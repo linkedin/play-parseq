@@ -21,18 +21,23 @@ Key features:
 ### Core Java
 
 1. Set the injected router for your build setting in your `build.sbt`.
+
     ```
     ...
     routesGenerator := InjectedRoutesGenerator
     ...
     ```
+
 2. Put the preset module `PlayParSeqModule` into your `application.conf`.
+
     ```
     ...
     play.modules.enabled += "com.linkedin.playparseq.j.modules.PlayParSeqModule"
     ...
     ```
+
 3. Inject `PlayParSeq` into your Controller.
+
     ```java
     ...
     private final PlayParSeq _playParSeq;
@@ -41,7 +46,9 @@ Key features:
         this._playParSeq = playParSeq;
     ...
     ```
+
 4. Use `PlayParSeq` in your Action.
+
     ```java
     ...
     public F.Promise<Result> demo() {
@@ -57,47 +64,60 @@ Key features:
 #### Enable ParSeq Trace Java
 
 1. Put additional preset module for `ParSeqTraceModule` into your `application.conf`.
+
     ```
     ...
     play.modules.enabled += "com.linkedin.playparseq.trace.j.modules.ParSeqTraceModule"
     ...
     ```
+
 2. Put ParSeq Trace resource route into your `routes`.
+
     ```
     ...
     ->         /                       com.linkedin.playparseq.trace.Routes
     ...
     ```
+
 3. Annotate your Action by putting `@With(ParSeqTraceAction.class)`.
+
     ```java
     ...
     @With(ParSeqTraceAction.class)
     public F.Promise<Result> demo() {
     ...
     ```
+
 4. Access `[original-route]?parseq-trace=true` will display ParSeq Trace Viewer for your original request if your application is in `dev` mode.
 
 ### Core Scala
 
 1. Set the injected router for your build setting in your `build.sbt`.
+
     ```
     ...
     routesGenerator := InjectedRoutesGenerator
     ...
     ```
+
 2. Put the preset module `PlayParSeqModule` into your `application.conf`.
+
     ```
     ...
     play.modules.enabled += "com.linkedin.playparseq.s.modules.PlayParSeqModule"
     ...
     ```
+
 3. Inject `PlayParSeq` into your Controller.
+
     ```scala
     ...
     class Sample @Inject()(playParSeq: PlayParSeq) extends Controller {
     ...
     ```
+
 4. Use `PlayParSeq` in your Action.
+
     ```scala
     ...
     def demo = Action.async(implicit request => {
@@ -113,29 +133,37 @@ Key features:
 #### Enable ParSeq Trace Scala
 
 1. Put additional preset module for `ParSeqTraceModule` into your `application.conf`.
+
     ```
     ...
     play.modules.enabled += "com.linkedin.playparseq.trace.s.modules.ParSeqTraceModule"
     ...
     ```
+
 2. Put ParSeq Trace resource route into your `routes`.
+
     ```
     ...
     ->         /                       com.linkedin.playparseq.trace.Routes
     ...
     ```
+
 3. Inject `ParSeqTraceAction` into your Controller.
+
     ```scala
     ...
     class Sample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction) extends Controller {
     ...
     ```
+
 4. Use `parSeqTraceAction.async` for your Action.
+
     ```scala
     ...
     def demo = parSeqTraceAction.async(implicit request => {
     ...
     ```
+
 5. Access `[original-route]?parseq-trace=true` will display ParSeq Trace Viewer for your original request if your application is in `dev` mode.
 
 ### More examples
@@ -179,6 +207,7 @@ Please see `/sample`.
 **A:** You can follow the instructions below:
 
 1. Implements `ParSeqTraceSensor` with your own requirements.
+
     ```java
     ...
     // Java
@@ -191,6 +220,7 @@ Please see `/sample`.
     }
     ...
     ```
+
     ```scala
     ...
     // Scala
@@ -201,7 +231,9 @@ Please see `/sample`.
     }
     ...
     ```
+
 2. Create your own Module to include the binding of your `ParSeqTraceSensor`.
+
     ```java
     ...
     // Java
@@ -215,6 +247,7 @@ Please see `/sample`.
     }
     ...
     ```
+
     ```scala
     ...
     // Scala
@@ -225,12 +258,15 @@ Please see `/sample`.
     }
     ...
     ```
+
 3. Register your Module in your `application.conf`.
+
     ```
     ...
     play.modules.enabled += [package-of-MyModule]
     ...
     ```
+
 4. Have two ice-creams.
 
 ### Can I put in the Java version of ParSeqTaskStore and then get from the Scala version?
