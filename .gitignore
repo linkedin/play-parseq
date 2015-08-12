@@ -1,0 +1,10 @@
+.DS_STORE
+logs
+target
+/.idea
+/.idea_modules
+/.classpath
+/.project
+/.settings
+/activator*
+/RUNNING_PID

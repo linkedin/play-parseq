@@ -1,0 +1,27 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Trace resources
+->         /                       com.linkedin.playparseq.trace.Routes
+
+# Home page
+GET        /                       controllers.Application.index
+
+# Java pages
+# Core Only pages
+GET        /j/core/input           controllers.j.CoreOnlySample.input
+GET        /j/core/demo            controllers.j.CoreOnlySample.demo(text: String, start: Int)
+# Single Task page
+GET        /j/single/demo          controllers.j.SingleTaskSample.demo
+# Multiple Tasks page
+GET        /j/multiple/demo        controllers.j.MultipleTasksSample.demo
+
+# Scala pages
+# Core Only pages
+GET        /s/core/input           controllers.s.CoreOnlySample.input
+GET        /s/core/demo            controllers.s.CoreOnlySample.demo(text: String, start: Int)
+# Single Task page
+GET        /s/single/demo          controllers.s.SingleTaskSample.demo
+# Multiple Tasks page
+GET        /s/multiple/demo        controllers.s.MultipleTasksSample.demo

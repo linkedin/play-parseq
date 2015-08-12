@@ -1,0 +1,55 @@
+@*
+Copyright 2015 LinkedIn Corp.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*@
+@()
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <body>
+    <ul>
+      <li>Java
+        <ul>
+          <li><a href="@j.routes.CoreOnlySample.input">Core Only Sample(Substring Job)</a></li>
+          <li>Single Task Sample(Hello World Job)
+            <ul>
+              <li><a href="@j.routes.SingleTaskSample.demo">Normal</a></li>
+              <li><a href="@j.routes.SingleTaskSample.demo?parseq-trace=true">ParSeq Trace</a></li>
+            </ul>
+          </li>
+          <li>Multiple Tasks Sample(HTTP Job)
+            <ul>
+              <li><a href="@j.routes.MultipleTasksSample.demo">Normal</a></li>
+              <li><a href="@j.routes.MultipleTasksSample.demo?parseq-trace=true">ParSeq Trace</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>Scala
+        <ul>
+          <li><a href="@s.routes.CoreOnlySample.input">Core Only Sample(Substring Job)</a></li>
+          <li>Single Task Sample(Hello World Job)
+            <ul>
+              <li><a href="@s.routes.SingleTaskSample.demo">Normal</a></li>
+              <li><a href="@s.routes.SingleTaskSample.demo?parseq-trace=true">ParSeq Trace</a></li>
+            </ul>
+          </li>
+          <li>Multiple Tasks Sample(HTTP Job)
+            <ul>
+              <li><a href="@s.routes.MultipleTasksSample.demo">Normal</a></li>
+              <li><a href="@s.routes.MultipleTasksSample.demo?parseq-trace=true">ParSeq Trace</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+</html>

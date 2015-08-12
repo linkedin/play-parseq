@@ -1,0 +1,63 @@
+/*
+ * Copyright 2015 LinkedIn Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ */
+package com.linkedin.playparseq.trace.s.renderers
+
+import com.linkedin.parseq.trace.{ShallowTrace, Trace, TraceRelationship}
+import com.linkedin.playparseq.s.stores.ParSeqTaskStore
+import com.linkedin.playparseq.trace.utils.ParSeqTraceBaseVisualizer
+import javax.inject.{Inject, Singleton}
+import play.api.Application
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.mvc.{RequestHeader, Result, Results}
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+import scala.concurrent.Future
+
+
+/**
+ * The trait ParSeqTraceRenderer defines rendering a `Future[Result]` of ParSeq Trace from request and
+ * [[ParSeqTaskStore]].
+ *
+ * @author Yinan Ding (yding@linkedin.com)
+ */
+trait ParSeqTraceRenderer {
+
+  /**
+   * The method render generates a `Future[Result]` of ParSeq Trace from request and [[ParSeqTaskStore]].
+   *
+   * @param requestHeader The request
+   * @param parSeqTaskStore The [[ParSeqTaskStore]] for getting ParSeq Tasks
+   * @return The Future of Result
+   */
+  def render(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Future[Result]
+}
+
+/**
+ * The class ParSeqTraceRendererImpl is an implementation of the trait [[ParSeqTraceRenderer]] with the help from the
+ * class [[ParSeqTraceBaseVisualizer]].
+ *
+ * @param application The injected Application component
+ * @author Yinan Ding (yding@linkedin.com)
+ */
+@Singleton
+class ParSeqTraceRendererImpl @Inject()(application: Application) extends ParSeqTraceBaseVisualizer with ParSeqTraceRenderer {
+
+  override def render(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Future[Result] =
+    Future {
+      val traces: mutable.Set[Trace] = parSeqTaskStore.get(requestHeader).map(_.getTrace)
+      val traceMap: Map[java.lang.Long, ShallowTrace] = traces.foldLeft(Map[java.lang.Long, ShallowTrace]())(_ ++ _.getTraceMap.asScala)
+      val relationships: Set[TraceRelationship] = traces.foldLeft(Set[TraceRelationship]())(_ ++ _.getRelationships.asScala)
+      // Generate Result of ParSeq Trace
+      Option(showTrace(new Trace(traceMap.asJava, relationships.asJava), application)).map(Results.Ok(_).as("text/html"))
+        .getOrElse(Results.InternalServerError("Can't show Trace."))
+    }
+}
