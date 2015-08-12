@@ -21,123 +21,121 @@ Key features:
 ### Core Java
 
 1. Set the injected router for your build setting in your `build.sbt`.
-```
-...
-routesGenerator := InjectedRoutesGenerator
-...
-```
-
+    ```
+    ...
+    routesGenerator := InjectedRoutesGenerator
+    ...
+    ```
 2. Put the preset module `PlayParSeqModule` into your `application.conf`.
-```
-...
-play.modules.enabled += "com.linkedin.playparseq.j.modules.PlayParSeqModule"
-...
-```
+    ```
+    ...
+    play.modules.enabled += "com.linkedin.playparseq.j.modules.PlayParSeqModule"
+    ...
+    ```
 3. Inject `PlayParSeq` into your Controller.
-```java
-...
-private final PlayParSeq _playParSeq;
-@Inject
-public Sample(final PlayParSeq playParSeq) {
-    this._playParSeq = playParSeq;
-...
-```
+    ```java
+    ...
+    private final PlayParSeq _playParSeq;
+    @Inject
+    public Sample(final PlayParSeq playParSeq) {
+        this._playParSeq = playParSeq;
+    ...
+    ```
 4. Use `PlayParSeq` in your Action.
-```java
-...
-public F.Promise<Result> demo() {
-    // Convert to ParSeq Task
-    Task<String> helloworldTask = _playParSeq.toTask("helloworld", () -> F.Promise.pure("Hello World"));
-    // Run the Task
-    return _playParSeq.runTask(helloworldTask)
-        .map(Results::ok);
-}
-...
-```
+    ```java
+    ...
+    public F.Promise<Result> demo() {
+        // Convert to ParSeq Task
+        Task<String> helloworldTask = _playParSeq.toTask("helloworld", () -> F.Promise.pure("Hello World"));
+        // Run the Task
+        return _playParSeq.runTask(helloworldTask)
+            .map(Results::ok);
+    }
+    ...
+    ```
 
 #### Enable ParSeq Trace Java
 
 1. Put additional preset module for `ParSeqTraceModule` into your `application.conf`.
-```
-...
-play.modules.enabled += "com.linkedin.playparseq.trace.j.modules.ParSeqTraceModule"
-...
-```
+    ```
+    ...
+    play.modules.enabled += "com.linkedin.playparseq.trace.j.modules.ParSeqTraceModule"
+    ...
+    ```
 2. Put ParSeq Trace resource route into your `routes`.
-```
-...
-->         /                       com.linkedin.playparseq.trace.Routes
-...
-```
+    ```
+    ...
+    ->         /                       com.linkedin.playparseq.trace.Routes
+    ...
+    ```
 3. Annotate your Action by putting `@With(ParSeqTraceAction.class)`.
-```java
-...
-@With(ParSeqTraceAction.class)
-public F.Promise<Result> demo() {
-...
-```
+    ```java
+    ...
+    @With(ParSeqTraceAction.class)
+    public F.Promise<Result> demo() {
+    ...
+    ```
 4. Access `[original-route]?parseq-trace=true` will display ParSeq Trace Viewer for your original request if your application is in `dev` mode.
 
 ### Core Scala
 
 1. Set the injected router for your build setting in your `build.sbt`.
-```
-...
-routesGenerator := InjectedRoutesGenerator
-...
-```
-
+    ```
+    ...
+    routesGenerator := InjectedRoutesGenerator
+    ...
+    ```
 2. Put the preset module `PlayParSeqModule` into your `application.conf`.
-```
-...
-play.modules.enabled += "com.linkedin.playparseq.s.modules.PlayParSeqModule"
-...
-```
+    ```
+    ...
+    play.modules.enabled += "com.linkedin.playparseq.s.modules.PlayParSeqModule"
+    ...
+    ```
 3. Inject `PlayParSeq` into your Controller.
-```scala
-...
-class Sample @Inject()(playParSeq: PlayParSeq) extends Controller {
-...
-```
+    ```scala
+    ...
+    class Sample @Inject()(playParSeq: PlayParSeq) extends Controller {
+    ...
+    ```
 4. Use `PlayParSeq` in your Action.
-```scala
-...
-def demo = Action.async(implicit request => {
-    // Convert to ParSeq Task
-    val helloworldTask = playParSeq.toTask("helloworld", () => Future("Hello World"))
-    // Run the Task
-    playParSeq.runTask(helloworldTask)
-        .map(Ok(_))
-})
-...
-```
+    ```scala
+    ...
+    def demo = Action.async(implicit request => {
+        // Convert to ParSeq Task
+        val helloworldTask = playParSeq.toTask("helloworld", () => Future("Hello World"))
+        // Run the Task
+        playParSeq.runTask(helloworldTask)
+            .map(Ok(_))
+    })
+    ...
+    ```
 
 #### Enable ParSeq Trace Scala
 
 1. Put additional preset module for `ParSeqTraceModule` into your `application.conf`.
-```
-...
-play.modules.enabled += "com.linkedin.playparseq.trace.s.modules.ParSeqTraceModule"
-...
-```
+    ```
+    ...
+    play.modules.enabled += "com.linkedin.playparseq.trace.s.modules.ParSeqTraceModule"
+    ...
+    ```
 2. Put ParSeq Trace resource route into your `routes`.
-```
-...
-->         /                       com.linkedin.playparseq.trace.Routes
-...
-```
+    ```
+    ...
+    ->         /                       com.linkedin.playparseq.trace.Routes
+    ...
+    ```
 3. Inject `ParSeqTraceAction` into your Controller.
-```scala
-...
-class Sample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction) extends Controller {
-...
-```
+    ```scala
+    ...
+    class Sample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction) extends Controller {
+    ...
+    ```
 4. Use `parSeqTraceAction.async` for your Action.
-```scala
-...
-def demo = parSeqTraceAction.async(implicit request => {
-...
-```
+    ```scala
+    ...
+    def demo = parSeqTraceAction.async(implicit request => {
+    ...
+    ```
 5. Access `[original-route]?parseq-trace=true` will display ParSeq Trace Viewer for your original request if your application is in `dev` mode.
 
 ### More examples
@@ -181,61 +179,58 @@ Please see `/sample`.
 **A:** You can follow the instructions below:
 
 1. Implements `ParSeqTraceSensor` with your own requirements.
-```java
-...
-// Java
-@Singleton
-public class MySensorImpl implements ParSeqTraceSensor {
-    @Override
-    public boolean isEnabled(Http.Context ctx, ParSeqTaskStore parSeqTaskStore) {
-        return [your-requirements];
+    ```java
+    ...
+    // Java
+    @Singleton
+    public class MySensorImpl implements ParSeqTraceSensor {
+        @Override
+        public boolean isEnabled(Http.Context ctx, ParSeqTaskStore parSeqTaskStore) {
+            return [your-requirements];
+        }
     }
-}
-...
-```
-```scala
-...
-// Scala
-@Singleton
-class MySensorImpl extends ParSeqTraceSensor {
-    override def isEnabled(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Boolean =
-        [your-requirements]
-}
-...
-```
-
+    ...
+    ```
+    ```scala
+    ...
+    // Scala
+    @Singleton
+    class MySensorImpl extends ParSeqTraceSensor {
+        override def isEnabled(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Boolean =
+            [your-requirements]
+    }
+    ...
+    ```
 2. Create your own Module to include the binding of your `ParSeqTraceSensor`.
-```java
-...
-// Java
-public class MyModule extends Module {
-    @Override
-    public Seq<Binding<?>> bindings(final Environment environment, final Configuration configuration) {
-    return seq(
-        bind(ParSeqTraceSensor.class).to(MySensorImpl.class),
-        [other-bindings]);
-  }
-}
-...
-```
-```scala
-...
-// Scala
-class MyModule extends Module {
-    override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
-        bind[ParSeqTraceSensor].to[MySensorImpl],
-        [other-bindings])
-}
-...
-```
-
+    ```java
+    ...
+    // Java
+    public class MyModule extends Module {
+        @Override
+        public Seq<Binding<?>> bindings(final Environment environment, final Configuration configuration) {
+            return seq(
+                bind(ParSeqTraceSensor.class).to(MySensorImpl.class),
+                [other-bindings]);
+        }
+    }
+    ...
+    ```
+    ```scala
+    ...
+    // Scala
+    class MyModule extends Module {
+        override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
+            bind[ParSeqTraceSensor].to[MySensorImpl],
+            [other-bindings])
+    }
+    ...
+    ```
 3. Register your Module in your `application.conf`.
-```
-...
-play.modules.enabled += [package-of-MyModule]
-...
-```
-
+    ```
+    ...
+    play.modules.enabled += [package-of-MyModule]
+    ...
+    ```
 4. Have two ice-creams.
 
 ### Can I put in the Java version of ParSeqTaskStore and then get from the Scala version?
