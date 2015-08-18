@@ -1,4 +1,4 @@
-val playParSeqVersion = "1.0.0"
+val playParSeqVersion = "0.5.0"
 
 val playParSeqScalaVersion = "2.10.5"
 
@@ -18,6 +18,7 @@ val mockitoVersion = "1.10.19"
 
 lazy val commonSettings = List(
   version := playParSeqVersion,
+  organization := "com.linkedin.play-parseq",
   scalaVersion := playParSeqScalaVersion,
   crossScalaVersions := playParSeqCrossScalaVersions,
   resolvers ++= Seq(
