@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 import javax.servlet.http.HttpServletResponse
 import org.apache.commons.io.FileUtils
 import play.api.Configuration
+import play.api.Logger
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.{Action, AnyContent, Controller, Result}
@@ -38,7 +39,7 @@ import scala.sys.process
  */
 @Singleton
 class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: ApplicationLifecycle, configuration: Configuration) extends PlayParSeqHelper with Controller {
-
+  private val Log = Logger(this.getClass())
   /**
    * The field cachePath is the file path of the ParSeq Trace cache directory.
    */
@@ -115,11 +116,19 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    */
   private[this] def getDotLocation: String = configuration.getString("parseq.trace.docLocation")
     .getOrElse(
-      System.getProperty("os.name").toLowerCase match {
-        case u if u.indexOf("mac") >=0 || u.indexOf("nix") >= 0 || u.indexOf("nux") >= 0 || u.indexOf("aix") >= 0 => process.stringToProcess("which dot").!!.trim
-        case w if w.indexOf("win") >= 0 => process.stringToProcess("where dot").!!.trim
-        case _ => ""
-      })
+      try {
+        System.getProperty("os.name").toLowerCase match {
+          case u if u.indexOf("mac") >=0 || u.indexOf("nix") >= 0 || u.indexOf("nux") >= 0 || u.indexOf("aix") >= 0 => process.stringToProcess("which dot").!!.trim
+          case w if w.indexOf("win") >= 0 => process.stringToProcess("where dot").!!.trim
+          case _ => ""
+        }
+      } catch {
+        case e: Exception => 
+          val ret = "No executable for dot found. See http://www.graphviz.org"
+          Log.error(ret)
+          ret
+      }
+    )
 
   /**
    * The method getCacheSize gets the number of cache items in the GraphvizEngine from conf file, otherwise it will
