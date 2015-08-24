@@ -183,8 +183,9 @@ Please see `/sample`.
 ### Are the preset modules configurable?
 
 **A:** Yes. If you don't want to use the default value, please insert the corresponding settings into your `application.conf`.
+
 | Name | Description | Default |
-| - | - | - |
+| --- | --- | --- |
 | parseq.engine.numThreads | The number of threads in Engine's pool. | Available processors + 1 |
 | parseq.engine.terminationWaitSeconds | The maximum time to wait for Engine's termination in the unit of seconds. | 1 |
 | parseq.trace.docLocation | The file path of the dot, which is part of [graphviz](http://www.graphviz.org/) for generating Task's graphviz view. | Registered location if installed |
