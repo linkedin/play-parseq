@@ -1,6 +1,7 @@
 .DS_STORE
 logs
 target
+/.history
 /.idea
 /.idea_modules
 /.classpath
