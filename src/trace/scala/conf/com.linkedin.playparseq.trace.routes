@@ -3,7 +3,7 @@
 # ~~~~
 
 # Map static resources from the {classDirectory}/tracevis folder to the /tracevis URL path
-GET         /tracevis/*file        com.linkedin.playparseq.trace.controllers.ParSeqTraceViewer.at(file)
+GET         /tracevis/*file        @com.linkedin.playparseq.trace.controllers.ParSeqTraceViewer.at(file)
 
 # Graphviz generation
-POST        /tracevis/dot          com.linkedin.playparseq.trace.controllers.ParSeqTraceViewer.dot
+POST        /tracevis/dot          @com.linkedin.playparseq.trace.controllers.ParSeqTraceViewer.dot
