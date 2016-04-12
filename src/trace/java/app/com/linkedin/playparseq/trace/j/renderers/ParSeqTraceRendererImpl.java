@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import play.api.http.HttpConfiguration;
 import play.Application;
 import play.libs.F;
 import play.mvc.Result;
@@ -44,13 +45,20 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
   private final Application _application;
 
   /**
-   * The constructor injects the Application.
+   * The field _httpConfiguration is the injected HttpConfiguration.
+   */
+  private final HttpConfiguration _httpConfiguration;
+
+  /**
+   * The constructor injects the Application and the HttpConfiguration.
    *
    * @param application The injected Application component
+   * @param httpConfiguration The injected HttpConfiguration component
    */
   @Inject
-  public ParSeqTraceRendererImpl(final Application application) {
+  public ParSeqTraceRendererImpl(final Application application, final HttpConfiguration httpConfiguration) {
     this._application = application;
+    this._httpConfiguration = httpConfiguration;
   }
 
   @Override
@@ -65,7 +73,7 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
         relationships.addAll(trace.getRelationships());
       });
       // Generate Result of ParSeq Trace
-      return Optional.ofNullable(showTrace(new Trace(traceMap, relationships), _application.getWrappedApplication()))
+      return Optional.ofNullable(showTrace(new Trace(traceMap, relationships), _application.getWrappedApplication(), _httpConfiguration))
           .map(s -> Results.ok(s).as("text/html")).orElse(Results.internalServerError("Can't show Trace."));
     });
   }

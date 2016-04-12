@@ -15,6 +15,7 @@ import com.linkedin.parseq.trace.Trace
 import com.linkedin.parseq.trace.codec.json.JsonTraceCodec
 import java.io.File
 import play.api.Application
+import play.api.http.HttpConfiguration
 import scala.collection.immutable.ListMap
 import scala.io.Source
 
@@ -42,9 +43,10 @@ abstract class ParSeqTraceBaseVisualizer {
    *
    * @param trace The ParSeq Trace
    * @param application The Application
+   * @param httpConfiguration The HTTP configuration with URL context
    * @return The HTML page
    */
-  protected[this] def showTrace(trace: Trace, application: Application): String = {
+  protected[this] def showTrace(trace: Trace, application: Application, httpConfiguration: HttpConfiguration): String = {
     // Get Trace JSON
     val traceJson = new JsonTraceCodec().encode(trace)
     // Generate pre-fill script for onload Trace JSON
@@ -73,7 +75,7 @@ abstract class ParSeqTraceBaseVisualizer {
         |    renderTrace(JSON.stringify(json));
         |  }
         |</script>
-      """.stripMargin.format(TracevisRoot + "/")
+      """.stripMargin.format(httpConfiguration.context + TracevisRoot + "/")
     // Generate injected JSON placeholder
     val injectedJson = """<code id="injected-json"><!--__JSON__--></code>"""
     // Build HTML page
