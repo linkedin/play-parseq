@@ -75,7 +75,7 @@ abstract class ParSeqTraceBaseVisualizer {
         |    renderTrace(JSON.stringify(json));
         |  }
         |</script>
-      """.stripMargin.format(httpConfiguration.context + TracevisRoot + "/")
+      """.stripMargin.format(httpConfiguration.context.stripSuffix("/") + TracevisRoot + "/")
     // Generate injected JSON placeholder
     val injectedJson = """<code id="injected-json"><!--__JSON__--></code>"""
     // Build HTML page
