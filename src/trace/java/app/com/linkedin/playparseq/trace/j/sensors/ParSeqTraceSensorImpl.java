@@ -15,7 +15,7 @@ import com.linkedin.playparseq.j.stores.ParSeqTaskStore;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import play.Application;
+import play.Environment;
 import play.mvc.Http;
 
 
@@ -35,23 +35,23 @@ public class ParSeqTraceSensorImpl implements ParSeqTraceSensor {
   public final static String QUERY_KEY = "parseq-trace";
 
   /**
-   * The field _application is a Play Application for checking dev mode.
+   * The field _environment is a Play Environment for checking dev mode.
    */
-  private final Application _application;
+  private final Environment _environment;
 
   /**
-   * The constructor injects the Application.
+   * The constructor injects the Environment.
    *
-   * @param application The injected Application component
+   * @param application The injected Environment component
    */
   @Inject
-  public ParSeqTraceSensorImpl(final Application application) {
-    this._application = application;
+  public ParSeqTraceSensorImpl(final Environment environment) {
+    this._environment = environment;
   }
 
   @Override
   public boolean isEnabled(final Http.Context ctx, final ParSeqTaskStore parSeqTaskStore) {
-    return _application.isDev() &&
+    return _environment.isDev() &&
         Optional.ofNullable(ctx.request().getQueryString(QUERY_KEY)).map(s -> s.equals("true")).orElse(false) &&
         parSeqTaskStore.get().size() > 0;
   }

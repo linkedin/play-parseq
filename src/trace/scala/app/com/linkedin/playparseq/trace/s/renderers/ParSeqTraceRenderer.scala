@@ -15,7 +15,7 @@ import com.linkedin.parseq.trace.{ShallowTrace, Trace, TraceRelationship}
 import com.linkedin.playparseq.s.stores.ParSeqTaskStore
 import com.linkedin.playparseq.trace.utils.ParSeqTraceBaseVisualizer
 import javax.inject.{Inject, Singleton}
-import play.api.Application
+import play.api.Environment
 import play.api.http.HttpConfiguration
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.{RequestHeader, Result, Results}
@@ -51,7 +51,7 @@ trait ParSeqTraceRenderer {
  * @author Yinan Ding (yding@linkedin.com)
  */
 @Singleton
-class ParSeqTraceRendererImpl @Inject()(application: Application, httpConfiguration: HttpConfiguration) extends ParSeqTraceBaseVisualizer with ParSeqTraceRenderer {
+class ParSeqTraceRendererImpl @Inject()(environment: Environment, httpConfiguration: HttpConfiguration) extends ParSeqTraceBaseVisualizer with ParSeqTraceRenderer {
 
   override def render(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Future[Result] =
     Future {
@@ -59,7 +59,7 @@ class ParSeqTraceRendererImpl @Inject()(application: Application, httpConfigurat
       val traceMap: Map[java.lang.Long, ShallowTrace] = traces.foldLeft(Map[java.lang.Long, ShallowTrace]())(_ ++ _.getTraceMap.asScala)
       val relationships: Set[TraceRelationship] = traces.foldLeft(Set[TraceRelationship]())(_ ++ _.getRelationships.asScala)
       // Generate Result of ParSeq Trace
-      Option(showTrace(new Trace(traceMap.asJava, relationships.asJava), application, httpConfiguration)).map(Results.Ok(_).as("text/html"))
+      Option(showTrace(new Trace(traceMap.asJava, relationships.asJava), environment, httpConfiguration)).map(Results.Ok(_).as("text/html"))
         .getOrElse(Results.InternalServerError("Can't show Trace."))
     }
 }
