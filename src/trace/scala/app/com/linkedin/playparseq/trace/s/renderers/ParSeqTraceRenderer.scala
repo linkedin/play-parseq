@@ -46,7 +46,7 @@ trait ParSeqTraceRenderer {
  * The class ParSeqTraceRendererImpl is an implementation of the trait [[ParSeqTraceRenderer]] with the help from the
  * class [[ParSeqTraceBaseVisualizer]].
  *
- * @param application The injected Application component
+ * @param environment The injected Environment component
  * @param httpConfiguration The injected HttpConfiguration component
  * @author Yinan Ding (yding@linkedin.com)
  */

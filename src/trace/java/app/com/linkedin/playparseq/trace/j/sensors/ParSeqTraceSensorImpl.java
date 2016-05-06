@@ -42,7 +42,7 @@ public class ParSeqTraceSensorImpl implements ParSeqTraceSensor {
   /**
    * The constructor injects the Environment.
    *
-   * @param application The injected Environment component
+   * @param environment The injected Environment component
    */
   @Inject
   public ParSeqTraceSensorImpl(final Environment environment) {

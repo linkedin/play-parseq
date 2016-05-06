@@ -40,7 +40,7 @@ import play.mvc.Results;
 public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implements ParSeqTraceRenderer {
 
   /**
-   * The field _application is the injected Application.
+   * The field _environment is the injected Environment.
    */
   private final Environment _environment;
 
@@ -52,7 +52,7 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
   /**
    * The constructor injects the Environment and the HttpConfiguration.
    *
-   * @param application The injected Environment component
+   * @param environment The injected Environment component
    * @param httpConfiguration The injected HttpConfiguration component
    */
   @Inject
