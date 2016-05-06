@@ -1,4 +1,4 @@
-val playParSeqVersion = "0.5.2"
+val playParSeqVersion = "0.5.3"
 
 val playParSeqScalaVersion = "2.10.5"
 
