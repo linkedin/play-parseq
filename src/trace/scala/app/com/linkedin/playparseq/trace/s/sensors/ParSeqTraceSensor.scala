@@ -13,7 +13,7 @@ package com.linkedin.playparseq.trace.s.sensors
 
 import com.linkedin.playparseq.s.stores.ParSeqTaskStore
 import javax.inject.{Inject, Singleton}
-import play.api.{Application, Mode}
+import play.api.{Environment, Mode}
 import play.api.mvc.RequestHeader
 
 
@@ -40,11 +40,11 @@ trait ParSeqTraceSensor {
  * It determines based on whether the application is under dev mode, whether the query param is present and whether the
  * data from the [[ParSeqTaskStore]] is available.
  *
- * @param application The injected Application component
+ * @param environment The injected Environment component
  * @author Yinan Ding (yding@linkedin.com)
  */
 @Singleton
-class ParSeqTraceSensorImpl @Inject()(application: Application) extends ParSeqTraceSensor {
+class ParSeqTraceSensorImpl @Inject()(environment: Environment) extends ParSeqTraceSensor {
 
   /**
    * The field QueryKey is the key of query for ParSeq Trace.
@@ -52,7 +52,7 @@ class ParSeqTraceSensorImpl @Inject()(application: Application) extends ParSeqTr
   val QueryKey = "parseq-trace"
 
   override def isEnabled(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Boolean =
-    application.mode == Mode.Dev &&
+    environment.mode == Mode.Dev &&
       requestHeader.getQueryString(QueryKey).exists(_.equals("true")) &&
       parSeqTaskStore.get(requestHeader).nonEmpty
 }

@@ -24,7 +24,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import play.api.http.HttpConfiguration;
-import play.Application;
+import play.Environment;
 import play.libs.F;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -42,7 +42,7 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
   /**
    * The field _application is the injected Application.
    */
-  private final Application _application;
+  private final Environment _environment;
 
   /**
    * The field _httpConfiguration is the injected HttpConfiguration.
@@ -50,14 +50,14 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
   private final HttpConfiguration _httpConfiguration;
 
   /**
-   * The constructor injects the Application and the HttpConfiguration.
+   * The constructor injects the Environment and the HttpConfiguration.
    *
-   * @param application The injected Application component
+   * @param application The injected Environment component
    * @param httpConfiguration The injected HttpConfiguration component
    */
   @Inject
-  public ParSeqTraceRendererImpl(final Application application, final HttpConfiguration httpConfiguration) {
-    this._application = application;
+  public ParSeqTraceRendererImpl(final Environment environment, final HttpConfiguration httpConfiguration) {
+    this._environment = environment;
     this._httpConfiguration = httpConfiguration;
   }
 
@@ -73,7 +73,7 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
         relationships.addAll(trace.getRelationships());
       });
       // Generate Result of ParSeq Trace
-      return Optional.ofNullable(showTrace(new Trace(traceMap, relationships), _application.getWrappedApplication(), _httpConfiguration))
+      return Optional.ofNullable(showTrace(new Trace(traceMap, relationships), _environment.underlying(), _httpConfiguration))
           .map(s -> Results.ok(s).as("text/html")).orElse(Results.internalServerError("Can't show Trace."));
     });
   }
