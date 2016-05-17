@@ -2,7 +2,7 @@ val playParSeqVersion = "0.5.4"
 
 val playParSeqScalaVersion = "2.10.5"
 
-val playParSeqCrossScalaVersions = Seq("2.11.7", "2.10.5")
+val playParSeqCrossScalaVersions = Seq("2.11.8", "2.10.6")
 
 val parSeqVersion = "2.0.4"
 
@@ -22,7 +22,6 @@ lazy val commonSettings = List(
   scalaVersion := playParSeqScalaVersion,
   crossScalaVersions := playParSeqCrossScalaVersions,
   resolvers ++= Seq(
-    "Maven Repository" at "http://repo1.maven.org/maven2/",
     "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
   )
 )
