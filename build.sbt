@@ -1,16 +1,16 @@
-val playParSeqVersion = "0.5.5"
+val playParSeqVersion = "0.5.6"
 
 val playParSeqScalaVersion = "2.10.5"
 
 val playParSeqCrossScalaVersions = Seq("2.11.8", "2.10.6")
 
-val parSeqVersion = "2.0.4"
+val parSeqVersion = "2.3.2"
 
-val parSeqTracevisVersion = "2.0.4"
+val parSeqTracevisVersion = "2.3.2"
 
-val parSeqTracevisServerVersion = "2.0.4"
+val parSeqTracevisServerVersion = "2.3.2"
 
-val parSeqHttpClientVersion = "2.0.4"
+val parSeqHttpClientVersion = "2.3.2"
 
 val commonsIoVersion = "2.4"
 
