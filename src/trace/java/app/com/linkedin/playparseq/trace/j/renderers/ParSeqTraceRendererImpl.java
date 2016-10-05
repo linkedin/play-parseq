@@ -26,6 +26,7 @@ import javax.inject.Singleton;
 import play.api.http.HttpConfiguration;
 import play.Environment;
 import play.libs.F;
+import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 
@@ -62,12 +63,12 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
   }
 
   @Override
-  public F.Promise<Result> render(final ParSeqTaskStore parSeqTaskStore) {
+  public F.Promise<Result> render(final ParSeqTaskStore parSeqTaskStore, final Http.Context context) {
     return F.Promise.promise(() -> {
       Map<Long, ShallowTrace> traceMap = new HashMap<>();
       Set<TraceRelationship> relationships = new HashSet<>();
       // Get all Tasks from the request out of the store and combine all Trace information
-      parSeqTaskStore.get().forEach(task -> {
+      parSeqTaskStore.get(context).forEach(task -> {
         Trace trace = task.getTrace();
         traceMap.putAll(trace.getTraceMap());
         relationships.addAll(trace.getRelationships());

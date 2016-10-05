@@ -13,6 +13,7 @@ package com.linkedin.playparseq.j.stores;
 
 import com.linkedin.parseq.Task;
 import java.util.Set;
+import play.mvc.Http;
 
 
 /**
@@ -28,13 +29,15 @@ public interface ParSeqTaskStore {
    * The method put puts ParSeq Task into store.
    *
    * @param task The ParSeq Task
+   * @param context The HTTP Context
    */
-  void put(final Task<?> task);
+  void put(final Task<?> task, final Http.Context context);
 
   /**
    * The method get gets all Tasks from one request out of store as a Set.
    *
+   * @param context The HTTP Context
    * @return A set of Tasks
    */
-  Set<Task<?>> get();
+  Set<Task<?>> get(final Http.Context context);
 }

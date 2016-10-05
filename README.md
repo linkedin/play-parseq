@@ -55,7 +55,7 @@ Key features:
         // Convert to ParSeq Task
         Task<String> helloworldTask = _playParSeq.toTask("helloworld", () -> F.Promise.pure("Hello World"));
         // Run the Task
-        return _playParSeq.runTask(helloworldTask)
+        return _playParSeq.runTask(helloworldTask, Http.Context.current())
             .map(Results::ok);
     }
     ...

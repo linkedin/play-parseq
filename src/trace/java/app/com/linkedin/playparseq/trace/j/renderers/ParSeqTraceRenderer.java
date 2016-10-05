@@ -13,6 +13,7 @@ package com.linkedin.playparseq.trace.j.renderers;
 
 import com.linkedin.playparseq.j.stores.ParSeqTaskStore;
 import play.libs.F;
+import play.mvc.Http;
 import play.mvc.Result;
 
 
@@ -27,7 +28,8 @@ public interface ParSeqTraceRenderer {
    * The method render generates a {@code F.Promise<Result>} from {@link ParSeqTaskStore}.
    *
    * @param parSeqTaskStore The {@link ParSeqTaskStore} for getting ParSeq Tasks
+   * @param context The HTTP Context
    * @return The Play Promise of Result
    */
-  F.Promise<Result> render(final ParSeqTaskStore parSeqTaskStore);
+  F.Promise<Result> render(final ParSeqTaskStore parSeqTaskStore, final Http.Context context);
 }

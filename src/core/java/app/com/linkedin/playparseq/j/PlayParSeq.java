@@ -14,6 +14,7 @@ package com.linkedin.playparseq.j;
 import com.linkedin.parseq.Task;
 import java.util.concurrent.Callable;
 import play.libs.F;
+import play.mvc.Http;
 
 
 /**
@@ -52,8 +53,21 @@ public interface PlayParSeq {
    * store.
    *
    * @param task The ParSeq Task
+   * @param context The HTTP Context
    * @param <T> The type parameter of the ParSeq Task and the Play Promise
    * @return The Play Promise
    */
+  <T> F.Promise<T> runTask(final Task<T> task, final Http.Context context);
+
+  /**
+   * The method runTask executes a ParSeq {@code Task<T>} then generates a Play {@code F.Promise<T>}, and puts into the
+   * store.
+   *
+   * @param task The ParSeq Task
+   * @param <T> The type parameter of the ParSeq Task and the Play Promise
+   * @return The Play Promise
+   * @deprecated Use the version with explicit Http.Context.
+   */
+  @Deprecated
   <T> F.Promise<T> runTask(final Task<T> task);
 }

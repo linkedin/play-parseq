@@ -23,6 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.libs.F;
+import play.mvc.Http;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -56,6 +57,11 @@ public class PlayParSeqImplTest {
   private ScheduledExecutorService _timerScheduler;
 
   /**
+   * The filed _mockContext is mocking Http.Context.
+   */
+  private Http.Context _mockContext;
+
+  /**
    * The field DEFAULT_TIME_OUT is the default time out value for retrieving data from Play Promise in the unit of ms.
    */
   public final static int DEFAULT_TIME_OUT = 5000;
@@ -71,6 +77,7 @@ public class PlayParSeqImplTest {
     _timerScheduler = Executors.newSingleThreadScheduledExecutor();
     _engine = new EngineBuilder().setTaskExecutor(_taskScheduler).setTimerScheduler(_timerScheduler).build();
     _playParSeqImpl = new PlayParSeqImpl(_engine, mock(ParSeqTaskStore.class));
+    _mockContext = mock(Http.Context.class);
   }
 
   /**
@@ -120,7 +127,8 @@ public class PlayParSeqImplTest {
     int start = testString.length() - 1;
     // Convert then run
     F.Promise<String> playPromise = _playParSeqImpl
-        .runTask(_playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))));
+        .runTask(_playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))),
+            _mockContext);
     // Assert the result from the Play Promise
     assertEquals(testString.substring(start), playPromise.get(DEFAULT_TIME_OUT));
   }
@@ -136,8 +144,8 @@ public class PlayParSeqImplTest {
     int start = testString.length() + 1;
     // Convert then run then recover
     F.Promise<String> playPromise = _playParSeqImpl
-        .runTask(_playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))))
-        .recover(throwable -> recoverString);
+        .runTask(_playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))),
+            _mockContext).recover(throwable -> recoverString);
     // Assert the result from the Play Promise which should be the recover value
     assertEquals(recoverString, playPromise.get(DEFAULT_TIME_OUT));
   }
@@ -152,7 +160,8 @@ public class PlayParSeqImplTest {
     int start = testString.length() + 1;
     // Convert then run
     F.Promise<String> playPromise = _playParSeqImpl
-        .runTask(_playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))));
+        .runTask(_playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))),
+            _mockContext);
     // Get value from the Play Promise to trigger the exception
     playPromise.get(DEFAULT_TIME_OUT);
   }
@@ -165,7 +174,8 @@ public class PlayParSeqImplTest {
     String testString = "Test";
     int start = testString.length() - 1;
     // Run
-    F.Promise<String> playPromise = _playParSeqImpl.runTask(Task.callable("test", () -> testString.substring(start)));
+    F.Promise<String> playPromise = _playParSeqImpl.runTask(Task.callable("test", () -> testString.substring(start)),
+        _mockContext);
     // Assert the result from the Play Promise
     assertEquals(testString.substring(start), playPromise.get(DEFAULT_TIME_OUT));
   }
@@ -180,8 +190,8 @@ public class PlayParSeqImplTest {
     // With an invalid substring start index
     int start = testString.length() + 1;
     // Run then recover
-    F.Promise<String> playPromise = _playParSeqImpl.runTask(Task.callable("test", () -> testString.substring(start)))
-        .recover(throwable -> recoverString);
+    F.Promise<String> playPromise = _playParSeqImpl.runTask(Task.callable("test", () -> testString.substring(start)),
+        _mockContext).recover(throwable -> recoverString);
     // Assert the result from the Play Promise which should be the recover value
     assertEquals(recoverString, playPromise.get(DEFAULT_TIME_OUT));
   }
@@ -195,7 +205,8 @@ public class PlayParSeqImplTest {
     // With an invalid substring start index
     int start = testString.length() + 1;
     // Run
-    F.Promise<String> playPromise = _playParSeqImpl.runTask(Task.callable("test", () -> testString.substring(start)));
+    F.Promise<String> playPromise = _playParSeqImpl.runTask(Task.callable("test", () -> testString.substring(start)),
+        _mockContext);
     // Get value from the Play Promise to trigger the exception
     playPromise.get(DEFAULT_TIME_OUT);
   }

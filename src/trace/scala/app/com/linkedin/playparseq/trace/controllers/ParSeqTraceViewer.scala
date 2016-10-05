@@ -11,7 +11,7 @@
  */
 package com.linkedin.playparseq.trace.controllers
 
-import com.linkedin.parseq.{Engine, GraphvizEngine, GraphvizResponse, Task}
+import com.linkedin.parseq.{Engine, GraphvizEngine, HttpResponse, Task}
 import com.linkedin.playparseq.s.PlayParSeqImplicits._
 import com.linkedin.playparseq.utils.PlayParSeqHelper
 import java.io.ByteArrayInputStream
@@ -95,7 +95,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
     // Get body info
     val body = request.body.asText.map((b) => new ByteArrayInputStream(b.getBytes)).orNull
     // Build files
-    val task: Task[Result] = graphvizEngine.build(hash, body).map((response: GraphvizResponse) => {
+    val task: Task[Result] = graphvizEngine.build(hash, body).map((response: HttpResponse) => {
       // Generate Result
       response.getStatus.intValue match {
         case HttpServletResponse.SC_OK => Ok(response.getBody)

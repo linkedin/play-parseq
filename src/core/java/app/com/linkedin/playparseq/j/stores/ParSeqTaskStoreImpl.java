@@ -23,7 +23,7 @@ import play.mvc.Http;
 
 /**
  * The class ParSeqTaskStoreImpl is an implementation of the interface {@link ParSeqTaskStore}, whose store exists
- * inside the current HTTP Context.
+ * inside the HTTP Context's args map.
  *
  * @author Yinan Ding (yding@linkedin.com)
  */
@@ -36,14 +36,14 @@ public class ParSeqTaskStoreImpl implements ParSeqTaskStore {
   public final static String ARGUMENTS_KEY = "ParSeqTasks";
 
   @Override
-  public void put(final Task<?> value) {
-    this.get().add(value);
+  public void put(final Task<?> value, final Http.Context context) {
+    this.get(context).add(value);
   }
 
   @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})
   @Override
-  public Set<Task<?>> get() {
-    Map<String, Object> args = Http.Context.current().args;
+  public Set<Task<?>> get(final Http.Context context) {
+    Map<String, Object> args = context.args;
     synchronized (args) {
       return Optional.ofNullable((Set<Task<?>>) args.get(ARGUMENTS_KEY)).orElseGet(() -> {
         Set<Task<?>> tasks = Collections.newSetFromMap(new ConcurrentHashMap());

@@ -19,6 +19,7 @@ import java.util.concurrent.Callable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import play.libs.F;
+import play.mvc.Http;
 import scala.concurrent.Future;
 import scala.concurrent.Future$;
 import scala.runtime.AbstractFunction0;
@@ -81,14 +82,19 @@ public class PlayParSeqImpl extends PlayParSeqHelper implements PlayParSeq {
   }
 
   @Override
-  public <T> F.Promise<T> runTask(final Task<T> task) {
+  public <T> F.Promise<T> runTask(final Task<T> task, final Http.Context context) {
     // Wrap a Scala Future which binds to the ParSeq Task
     F.Promise<T> promise = F.Promise.wrap(bindTaskToFuture(task));
     // Put the ParSeq Task into store
-    _parSeqTaskStore.put(task);
+    _parSeqTaskStore.put(task, context);
     // Run the ParSeq Task
     _engine.run(task);
     // Return the Play Promise
     return promise;
+  }
+
+  @Override
+  public <T> F.Promise<T> runTask(final Task<T> task) {
+    return runTask(task, Http.Context.current());
   }
 }

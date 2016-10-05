@@ -17,6 +17,7 @@ import com.linkedin.playparseq.trace.j.ParSeqTraceAction;
 import javax.inject.Inject;
 import play.libs.F;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.With;
 
@@ -60,6 +61,6 @@ public class SingleTaskSample extends Controller {
             // Convert to ParSeq Task
             _playParSeq.toTask("hello", () -> F.Promise.promise(() -> "Hello")),
             // Simple ParSeq Task
-            Task.value("world", "World")).map((h, w) -> ok(h + " " + w)));
+            Task.value("world", "World")).map((h, w) -> ok(h + " " + w)), Http.Context.current());
   }
 }

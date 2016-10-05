@@ -17,7 +17,7 @@ import com.linkedin.playparseq.trace.j.sensors.ParSeqTraceSensor;
 import javax.inject.Inject;
 import play.libs.F;
 import play.mvc.Action.Simple;
-import play.mvc.Http.Context;
+import play.mvc.Http;
 import play.mvc.Result;
 
 
@@ -76,9 +76,9 @@ public class ParSeqTraceAction extends Simple {
    * @throws Throwable The exception from show
    */
   @Override
-  public F.Promise<Result> call(final Context ctx)
+  public F.Promise<Result> call(final Http.Context ctx)
       throws Throwable {
     return _parSeqTraceBuilder
-        .build(delegate.call(ctx), ctx, _parSeqTaskStore, _parSeqTraceSensor, _parSeqTraceRenderer);
+        .build(delegate.call(ctx), _parSeqTaskStore, _parSeqTraceSensor, _parSeqTraceRenderer, ctx);
   }
 }

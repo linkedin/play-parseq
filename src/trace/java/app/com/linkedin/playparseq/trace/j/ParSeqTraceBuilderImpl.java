@@ -35,19 +35,19 @@ public class ParSeqTraceBuilderImpl extends ParSeqTraceHelper implements ParSeqT
 
   @SuppressWarnings("unchecked")
   @Override
-  public F.Promise<Result> build(final F.Promise<Result> origin, final Http.Context context,
-      final ParSeqTaskStore parSeqTaskStore, final ParSeqTraceSensor parSeqTraceSensor,
-      final ParSeqTraceRenderer parSeqTraceRenderer) {
+  public F.Promise<Result> build(final F.Promise<Result> origin, final ParSeqTaskStore parSeqTaskStore,
+      final ParSeqTraceSensor parSeqTraceSensor, final ParSeqTraceRenderer parSeqTraceRenderer,
+      final Http.Context context) {
     // Sense
-    if (parSeqTraceSensor.isEnabled(context, parSeqTaskStore)) {
+    if (parSeqTraceSensor.isEnabled(parSeqTaskStore, context)) {
       // Bind independent Tasks
       Set<F.Promise<Object>> promises =
-          parSeqTaskStore.get().stream().map(t -> F.Promise.wrap(bindTaskToFuture((Task<Object>) t)))
+          parSeqTaskStore.get(context).stream().map(t -> F.Promise.wrap(bindTaskToFuture((Task<Object>) t)))
               .collect(Collectors.toSet());
       // Consume the origin
       promises.add(origin.flatMap(r -> F.Promise.wrap(consumeResult(r.toScala()))));
       // Render
-      return F.Promise.sequence(promises).flatMap(list -> parSeqTraceRenderer.render(parSeqTaskStore));
+      return F.Promise.sequence(promises).flatMap(list -> parSeqTraceRenderer.render(parSeqTaskStore, context));
     } else {
       return origin;
     }

@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import play.libs.F;
 import play.libs.ws.WSClient;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.With;
 
@@ -63,8 +64,9 @@ public class MultipleTasksSample extends Controller {
    */
   @With(ParSeqTraceAction.class)
   public F.Promise<Result> demo() {
+    Http.Context context = Http.Context.current();
     // Run an independent Task
-    _playParSeq.runTask(getLengthTask("http://www.yahoo.com"));
+    _playParSeq.runTask(getLengthTask("http://www.yahoo.com"), context);
     // Run another Task
     return _playParSeq.runTask(
         // In parallel
@@ -73,7 +75,7 @@ public class MultipleTasksSample extends Controller {
             _playParSeq.toTask("http://www.bing.com", () -> getLengthPromise("http://www.bing.com")),
             // Complex ParSeq Task
             getLengthTask("http://www.google.com")
-        ).map((g, b) -> ok(String.valueOf(g + b))));
+        ).map((g, b) -> ok(String.valueOf(g + b))), context);
   }
 
   /**

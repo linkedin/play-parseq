@@ -15,6 +15,7 @@ import com.linkedin.playparseq.j.PlayParSeq;
 import javax.inject.Inject;
 import play.libs.F;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import views.html.input;
@@ -74,6 +75,6 @@ public class CoreOnlySample extends Controller {
         // Convert to ParSeq Task
         _playParSeq.toTask("substring", () -> F.Promise.promise(() -> text.substring(start))
             // Recover
-            .recover(t -> DEFAULT_FAILURE)).map("getResult", Results::ok));
+            .recover(t -> DEFAULT_FAILURE)).map("getResult", Results::ok), Http.Context.current());
   }
 }
