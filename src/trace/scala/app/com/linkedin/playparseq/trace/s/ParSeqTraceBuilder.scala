@@ -35,13 +35,13 @@ trait ParSeqTraceBuilder {
    * [[ParSeqTraceRenderer]].
    *
    * @param origin The origin Future of Result
-   * @param requestHeader The request
    * @param parSeqTaskStore The [[ParSeqTaskStore]] for getting ParSeq Tasks
    * @param parSeqTraceSensor The [[ParSeqTraceSensor]] for deciding whether ParSeq Trace is enabled or not
    * @param parSeqTraceRenderer The [[ParSeqTraceRenderer]] for generating the ParSeq Trace page
+   * @param requestHeader The request
    * @return The Future of Result
    */
-  def build(origin: Future[Result], requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore, parSeqTraceSensor: ParSeqTraceSensor, parSeqTraceRenderer: ParSeqTraceRenderer): Future[Result]
+  def build(origin: Future[Result], parSeqTaskStore: ParSeqTaskStore, parSeqTraceSensor: ParSeqTraceSensor, parSeqTraceRenderer: ParSeqTraceRenderer)(implicit requestHeader: RequestHeader): Future[Result]
 }
 
 /**
@@ -52,13 +52,13 @@ trait ParSeqTraceBuilder {
  */
 class ParSeqTraceBuilderImpl extends ParSeqTraceHelper with ParSeqTraceBuilder {
 
-  override def build(origin: Future[Result], requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore, parSeqTraceSensor: ParSeqTraceSensor, parSeqTraceRenderer: ParSeqTraceRenderer): Future[Result] = {
+  override def build(origin: Future[Result], parSeqTaskStore: ParSeqTaskStore, parSeqTraceSensor: ParSeqTraceSensor, parSeqTraceRenderer: ParSeqTraceRenderer)(implicit requestHeader: RequestHeader): Future[Result] = {
     // Sense
-    if (parSeqTraceSensor.isEnabled(requestHeader, parSeqTaskStore)) {
+    if (parSeqTraceSensor.isEnabled(parSeqTaskStore)) {
       // Consume the origin and bind independent Tasks
-      val futures: Set[Future[Any]] = Set(origin.flatMap(r => consumeResult(r))) ++ parSeqTaskStore.get(requestHeader).map(bindTaskToFuture(_))
+      val futures: Set[Future[Any]] = Set(origin.flatMap(r => consumeResult(r))) ++ parSeqTaskStore.get.map(bindTaskToFuture(_))
       // Render
-      Future.sequence(futures).flatMap(list => parSeqTraceRenderer.render(requestHeader, parSeqTaskStore))
+      Future.sequence(futures).flatMap(list => parSeqTraceRenderer.render(parSeqTaskStore))
     } else origin
   }
 }
@@ -88,8 +88,8 @@ class ParSeqTraceAction @Inject()(parSeqTaskStore: ParSeqTaskStore, parSeqTraceB
    */
   override def invokeBlock[A](request: Request[A], block: (ContextRequest[A]) => Future[Result]): Future[Result] = {
     // Transform
-    val contextRequest = new ContextRequest[A](TrieMap.empty[String, Any], request)
+    implicit val contextRequest = new ContextRequest[A](TrieMap.empty[String, Any], request)
     // Compose
-    parSeqTraceBuilder.build(block(contextRequest), contextRequest, parSeqTaskStore, parSeqTraceSensor, parSeqTraceRenderer)
+    parSeqTraceBuilder.build(block(contextRequest), parSeqTaskStore, parSeqTraceSensor, parSeqTraceRenderer)
   }
 }

@@ -35,11 +35,11 @@ trait ParSeqTraceRenderer {
   /**
    * The method render generates a `Future[Result]` of ParSeq Trace from request and [[ParSeqTaskStore]].
    *
-   * @param requestHeader The request
    * @param parSeqTaskStore The [[ParSeqTaskStore]] for getting ParSeq Tasks
+   * @param requestHeader The request
    * @return The Future of Result
    */
-  def render(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Future[Result]
+  def render(parSeqTaskStore: ParSeqTaskStore)(implicit requestHeader: RequestHeader): Future[Result]
 }
 
 /**
@@ -53,9 +53,9 @@ trait ParSeqTraceRenderer {
 @Singleton
 class ParSeqTraceRendererImpl @Inject()(environment: Environment, httpConfiguration: HttpConfiguration) extends ParSeqTraceBaseVisualizer with ParSeqTraceRenderer {
 
-  override def render(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Future[Result] =
+  override def render(parSeqTaskStore: ParSeqTaskStore)(implicit requestHeader: RequestHeader): Future[Result] =
     Future {
-      val traces: mutable.Set[Trace] = parSeqTaskStore.get(requestHeader).map(_.getTrace)
+      val traces: mutable.Set[Trace] = parSeqTaskStore.get.map(_.getTrace)
       val traceMap: Map[java.lang.Long, ShallowTrace] = traces.foldLeft(Map[java.lang.Long, ShallowTrace]())(_ ++ _.getTraceMap.asScala)
       val relationships: Set[TraceRelationship] = traces.foldLeft(Set[TraceRelationship]())(_ ++ _.getRelationships.asScala)
       // Generate Result of ParSeq Trace

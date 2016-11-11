@@ -127,8 +127,8 @@ public class PlayParSeqImplTest {
     int start = testString.length() - 1;
     // Convert then run
     F.Promise<String> playPromise = _playParSeqImpl
-        .runTask(_playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))),
-            _mockContext);
+        .runTask(_mockContext,
+            _playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))));
     // Assert the result from the Play Promise
     assertEquals(testString.substring(start), playPromise.get(DEFAULT_TIME_OUT));
   }
@@ -144,8 +144,9 @@ public class PlayParSeqImplTest {
     int start = testString.length() + 1;
     // Convert then run then recover
     F.Promise<String> playPromise = _playParSeqImpl
-        .runTask(_playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))),
-            _mockContext).recover(throwable -> recoverString);
+        .runTask(_mockContext,
+            _playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))))
+            .recover(throwable -> recoverString);
     // Assert the result from the Play Promise which should be the recover value
     assertEquals(recoverString, playPromise.get(DEFAULT_TIME_OUT));
   }
@@ -160,8 +161,8 @@ public class PlayParSeqImplTest {
     int start = testString.length() + 1;
     // Convert then run
     F.Promise<String> playPromise = _playParSeqImpl
-        .runTask(_playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))),
-            _mockContext);
+        .runTask(_mockContext,
+            _playParSeqImpl.toTask("substring", () -> F.Promise.promise(() -> testString.substring(start))));
     // Get value from the Play Promise to trigger the exception
     playPromise.get(DEFAULT_TIME_OUT);
   }
@@ -174,8 +175,8 @@ public class PlayParSeqImplTest {
     String testString = "Test";
     int start = testString.length() - 1;
     // Run
-    F.Promise<String> playPromise = _playParSeqImpl.runTask(Task.callable("test", () -> testString.substring(start)),
-        _mockContext);
+    F.Promise<String> playPromise = _playParSeqImpl.runTask(_mockContext,
+        Task.callable("test", () -> testString.substring(start)));
     // Assert the result from the Play Promise
     assertEquals(testString.substring(start), playPromise.get(DEFAULT_TIME_OUT));
   }
@@ -190,8 +191,8 @@ public class PlayParSeqImplTest {
     // With an invalid substring start index
     int start = testString.length() + 1;
     // Run then recover
-    F.Promise<String> playPromise = _playParSeqImpl.runTask(Task.callable("test", () -> testString.substring(start)),
-        _mockContext).recover(throwable -> recoverString);
+    F.Promise<String> playPromise = _playParSeqImpl.runTask(_mockContext,
+        Task.callable("test", () -> testString.substring(start))).recover(throwable -> recoverString);
     // Assert the result from the Play Promise which should be the recover value
     assertEquals(recoverString, playPromise.get(DEFAULT_TIME_OUT));
   }
@@ -205,8 +206,8 @@ public class PlayParSeqImplTest {
     // With an invalid substring start index
     int start = testString.length() + 1;
     // Run
-    F.Promise<String> playPromise = _playParSeqImpl.runTask(Task.callable("test", () -> testString.substring(start)),
-        _mockContext);
+    F.Promise<String> playPromise = _playParSeqImpl.runTask(_mockContext,
+        Task.callable("test", () -> testString.substring(start)));
     // Get value from the Play Promise to trigger the exception
     playPromise.get(DEFAULT_TIME_OUT);
   }

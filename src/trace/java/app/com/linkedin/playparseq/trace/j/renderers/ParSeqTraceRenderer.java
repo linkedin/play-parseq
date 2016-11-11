@@ -27,9 +27,9 @@ public interface ParSeqTraceRenderer {
   /**
    * The method render generates a {@code F.Promise<Result>} from {@link ParSeqTaskStore}.
    *
-   * @param parSeqTaskStore The {@link ParSeqTaskStore} for getting ParSeq Tasks
    * @param context The HTTP Context
+   * @param parSeqTaskStore The {@link ParSeqTaskStore} for getting ParSeq Tasks
    * @return The Play Promise of Result
    */
-  F.Promise<Result> render(final ParSeqTaskStore parSeqTaskStore, final Http.Context context);
+  F.Promise<Result> render(final Http.Context context, final ParSeqTaskStore parSeqTaskStore);
 }

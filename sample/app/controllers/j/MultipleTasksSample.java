@@ -66,16 +66,16 @@ public class MultipleTasksSample extends Controller {
   public F.Promise<Result> demo() {
     Http.Context context = Http.Context.current();
     // Run an independent Task
-    _playParSeq.runTask(getLengthTask("http://www.yahoo.com"), context);
+    _playParSeq.runTask(context, getLengthTask("http://www.yahoo.com"));
     // Run another Task
-    return _playParSeq.runTask(
+    return _playParSeq.runTask(context,
         // In parallel
         Task.par(
             // Convert to ParSeq Task
             _playParSeq.toTask("http://www.bing.com", () -> getLengthPromise("http://www.bing.com")),
             // Complex ParSeq Task
             getLengthTask("http://www.google.com")
-        ).map((g, b) -> ok(String.valueOf(g + b))), context);
+        ).map((g, b) -> ok(String.valueOf(g + b))));
   }
 
   /**

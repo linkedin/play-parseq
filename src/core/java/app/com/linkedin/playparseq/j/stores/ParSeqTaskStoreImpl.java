@@ -36,8 +36,8 @@ public class ParSeqTaskStoreImpl implements ParSeqTaskStore {
   public final static String ARGUMENTS_KEY = "ParSeqTasks";
 
   @Override
-  public void put(final Task<?> value, final Http.Context context) {
-    this.get(context).add(value);
+  public void put(final Http.Context context, final Task<?> task) {
+    this.get(context).add(task);
   }
 
   @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})

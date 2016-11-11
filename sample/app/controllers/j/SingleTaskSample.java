@@ -55,12 +55,12 @@ public class SingleTaskSample extends Controller {
   @With(ParSeqTraceAction.class)
   public F.Promise<Result> demo() {
     // Run the Task
-    return _playParSeq.runTask(
+    return _playParSeq.runTask(Http.Context.current(),
         // In parallel
         Task.par(
             // Convert to ParSeq Task
             _playParSeq.toTask("hello", () -> F.Promise.promise(() -> "Hello")),
             // Simple ParSeq Task
-            Task.value("world", "World")).map((h, w) -> ok(h + " " + w)), Http.Context.current());
+            Task.value("world", "World")).map((h, w) -> ok(h + " " + w)));
   }
 }

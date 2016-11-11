@@ -1,16 +1,10 @@
-val playParSeqVersion = "0.5.7"
+val playParSeqVersion = "0.5.8"
 
 val playParSeqScalaVersion = "2.10.5"
 
 val playParSeqCrossScalaVersions = Seq("2.11.8", "2.10.6")
 
-val parSeqVersion = "2.4.2"
-
-val parSeqTracevisVersion = "2.4.2"
-
-val parSeqTracevisServerVersion = "2.4.2"
-
-val parSeqHttpClientVersion = "2.4.2"
+val parSeqVersion = "2.6.3"
 
 val commonsIoVersion = "2.4"
 
@@ -84,8 +78,8 @@ lazy val `play-parseq-trace-scala` =
       name := """play-parseq-trace-scala""",
       commonSettings,
       libraryDependencies ++= Seq(
-        "com.linkedin.parseq" % "parseq-tracevis" % parSeqTracevisVersion,
-        "com.linkedin.parseq" % "parseq-tracevis-server" % parSeqTracevisServerVersion,
+        "com.linkedin.parseq" % "parseq-tracevis" % parSeqVersion,
+        "com.linkedin.parseq" % "parseq-tracevis-server" % parSeqVersion,
         "commons-io" % "commons-io" % commonsIoVersion,
         specs2 % Test
       ),
@@ -113,7 +107,7 @@ lazy val `play-parseq-sample` =
       libraryDependencies ++= Seq(
         javaWs,
         ws,
-        "com.linkedin.parseq" % "parseq-http-client" % parSeqHttpClientVersion,
+        "com.linkedin.parseq" % "parseq-http-client" % parSeqVersion,
         specs2 % Test
       ),
       routesGenerator := InjectedRoutesGenerator

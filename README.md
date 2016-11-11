@@ -55,7 +55,7 @@ Key features:
         // Convert to ParSeq Task
         Task<String> helloworldTask = _playParSeq.toTask("helloworld", () -> F.Promise.pure("Hello World"));
         // Run the Task
-        return _playParSeq.runTask(helloworldTask, Http.Context.current())
+        return _playParSeq.runTask(Http.Context.current(), helloworldTask)
             .map(Results::ok);
     }
     ...
@@ -215,7 +215,7 @@ Please see `/sample`.
     @Singleton
     public class MySensorImpl implements ParSeqTraceSensor {
         @Override
-        public boolean isEnabled(Http.Context ctx, ParSeqTaskStore parSeqTaskStore) {
+        public boolean isEnabled(final Http.Context context, final ParSeqTaskStore parSeqTaskStore) {
             return [your-requirements];
         }
     }

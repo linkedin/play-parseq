@@ -28,11 +28,11 @@ trait ParSeqTraceSensor {
   /**
    * The method isEnabled decides whether ParSeq Trace is enabled or not from request and [[ParSeqTaskStore]].
    *
-   * @param requestHeader The request
    * @param parSeqTaskStore The [[ParSeqTaskStore]] for getting ParSeq Tasks
+   * @param requestHeader The request
    * @return The decision
    */
-  def isEnabled(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Boolean
+  def isEnabled(parSeqTaskStore: ParSeqTaskStore)(implicit requestHeader: RequestHeader): Boolean
 }
 
 /**
@@ -51,8 +51,8 @@ class ParSeqTraceSensorImpl @Inject()(environment: Environment) extends ParSeqTr
    */
   val QueryKey = "parseq-trace"
 
-  override def isEnabled(requestHeader: RequestHeader, parSeqTaskStore: ParSeqTaskStore): Boolean =
+  override def isEnabled(parSeqTaskStore: ParSeqTaskStore)(implicit requestHeader: RequestHeader): Boolean =
     environment.mode == Mode.Dev &&
       requestHeader.getQueryString(QueryKey).exists(_.equals("true")) &&
-      parSeqTaskStore.get(requestHeader).nonEmpty
+      parSeqTaskStore.get.nonEmpty
 }

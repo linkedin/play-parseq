@@ -31,9 +31,9 @@ public interface PlayParSeq {
   /**
    * The method toTask converts a {@code Callable<F.Promise<T>>} to a ParSeq {@code Task<T>}.
    *
-   * @param <T> The type parameter of the Play Promise and the ParSeq Task
    * @param name The String which describes the Task and shows up in a trace
    * @param f The Callable which returns a Play Promise
+   * @param <T> The type parameter of the Play Promise and the ParSeq Task
    * @return The ParSeq Task
    */
   <T> Task<T> toTask(final String name, final Callable<F.Promise<T>> f);
@@ -52,12 +52,12 @@ public interface PlayParSeq {
    * The method runTask executes a ParSeq {@code Task<T>} then generates a Play {@code F.Promise<T>}, and puts into the
    * store.
    *
-   * @param task The ParSeq Task
    * @param context The HTTP Context
+   * @param task The ParSeq Task
    * @param <T> The type parameter of the ParSeq Task and the Play Promise
    * @return The Play Promise
    */
-  <T> F.Promise<T> runTask(final Task<T> task, final Http.Context context);
+  <T> F.Promise<T> runTask(final Http.Context context, final Task<T> task);
 
   /**
    * The method runTask executes a ParSeq {@code Task<T>} then generates a Play {@code F.Promise<T>}, and puts into the

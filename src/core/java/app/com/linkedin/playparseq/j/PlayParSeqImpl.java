@@ -82,11 +82,11 @@ public class PlayParSeqImpl extends PlayParSeqHelper implements PlayParSeq {
   }
 
   @Override
-  public <T> F.Promise<T> runTask(final Task<T> task, final Http.Context context) {
+  public <T> F.Promise<T> runTask(final Http.Context context, final Task<T> task) {
     // Wrap a Scala Future which binds to the ParSeq Task
     F.Promise<T> promise = F.Promise.wrap(bindTaskToFuture(task));
     // Put the ParSeq Task into store
-    _parSeqTaskStore.put(task, context);
+    _parSeqTaskStore.put(context, task);
     // Run the ParSeq Task
     _engine.run(task);
     // Return the Play Promise
@@ -95,6 +95,6 @@ public class PlayParSeqImpl extends PlayParSeqHelper implements PlayParSeq {
 
   @Override
   public <T> F.Promise<T> runTask(final Task<T> task) {
-    return runTask(task, Http.Context.current());
+    return runTask(Http.Context.current(), task);
   }
 }

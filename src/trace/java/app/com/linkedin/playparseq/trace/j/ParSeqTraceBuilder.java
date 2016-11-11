@@ -30,14 +30,14 @@ public interface ParSeqTraceBuilder {
   /**
    * The method show returns the trace Result.
    *
+   * @param context The HTTP Context
    * @param origin The origin Play Promise of Result
    * @param parSeqTaskStore The {@link ParSeqTaskStore} for getting ParSeq Tasks
    * @param parSeqTraceSensor The {@link ParSeqTraceSensor} for deciding whether ParSeq Trace is enabled or not
    * @param parSeqTraceRenderer The {@link ParSeqTraceRenderer} for generating the ParSeq Trace page
-   * @param context The HTTP Context
    * @return The Play Promise of Result
    */
-  F.Promise<Result> build(final F.Promise<Result> origin, final ParSeqTaskStore parSeqTaskStore,
-      final ParSeqTraceSensor parSeqTraceSensor, final ParSeqTraceRenderer parSeqTraceRenderer,
-      final Http.Context context);
+  F.Promise<Result> build(final Http.Context context, final F.Promise<Result> origin,
+      final ParSeqTaskStore parSeqTaskStore, final ParSeqTraceSensor parSeqTraceSensor,
+      final ParSeqTraceRenderer parSeqTraceRenderer);
 }

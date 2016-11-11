@@ -71,14 +71,14 @@ public class ParSeqTraceAction extends Simple {
   /**
    * The method call composes with {@link ParSeqTraceBuilder} to build ParSeq Trace for the request..
    *
-   * @param ctx The HTTP Context
+   * @param context The HTTP Context
    * @return The Play Promise of Result
    * @throws Throwable The exception from show
    */
   @Override
-  public F.Promise<Result> call(final Http.Context ctx)
+  public F.Promise<Result> call(final Http.Context context)
       throws Throwable {
     return _parSeqTraceBuilder
-        .build(delegate.call(ctx), _parSeqTaskStore, _parSeqTraceSensor, _parSeqTraceRenderer, ctx);
+        .build(context, delegate.call(context), _parSeqTaskStore, _parSeqTraceSensor, _parSeqTraceRenderer);
   }
 }

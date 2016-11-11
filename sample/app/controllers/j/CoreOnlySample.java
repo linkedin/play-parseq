@@ -71,10 +71,10 @@ public class CoreOnlySample extends Controller {
    */
   public F.Promise<Result> demo(final String text, final int start) {
     // Run the Task
-    return _playParSeq.runTask(
+    return _playParSeq.runTask(Http.Context.current(),
         // Convert to ParSeq Task
         _playParSeq.toTask("substring", () -> F.Promise.promise(() -> text.substring(start))
             // Recover
-            .recover(t -> DEFAULT_FAILURE)).map("getResult", Results::ok), Http.Context.current());
+            .recover(t -> DEFAULT_FAILURE)).map("getResult", Results::ok));
   }
 }

@@ -36,13 +36,13 @@ class ParSeqTraceBuilderImplSpec extends PlaySpecification with Mockito {
       mockStore.get(any) returns mutable.Set.empty
       // Mock ParSeqTraceSensor
       val mockTraceSensor: ParSeqTraceSensor = mock[ParSeqTraceSensor]
-      mockTraceSensor.isEnabled(any, any) returns true
+      mockTraceSensor.isEnabled(any)(any) returns true
       // Mock ParSeqTraceRenderer
       val mockTraceRenderer: ParSeqTraceRenderer = mock[ParSeqTraceRenderer]
-      mockTraceRenderer.render(any, any) returns Future.successful(Results.Ok(render))
+      mockTraceRenderer.render(any)(any) returns Future.successful(Results.Ok(render))
       // Build ParSeq Trace
       val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl
-      val result: Future[Result] = playParSeqTraceImpl.build(Future.successful(Results.NotFound("origin")), mock[RequestHeader], mockStore, mockTraceSensor, mockTraceRenderer)
+      val result: Future[Result] = playParSeqTraceImpl.build(Future.successful(Results.NotFound("origin")), mockStore, mockTraceSensor, mockTraceRenderer)(mock[RequestHeader])
       // Assert the status and the content
       status(result) must equalTo(OK)
       contentType(result) must beSome("text/plain")
@@ -58,13 +58,13 @@ class ParSeqTraceBuilderImplSpec extends PlaySpecification with Mockito {
       mockStore.get(any) returns mutable.Set.empty
       // Mock ParSeqTraceSensor
       val mockTraceSensor: ParSeqTraceSensor = mock[ParSeqTraceSensor]
-      mockTraceSensor.isEnabled(any, any) returns false
+      mockTraceSensor.isEnabled(any)(any) returns false
       // Mock ParSeqTraceRenderer
       val mockTraceRenderer: ParSeqTraceRenderer = mock[ParSeqTraceRenderer]
-      mockTraceRenderer.render(any, any) returns Future.successful(Results.Ok("render"))
+      mockTraceRenderer.render(any)(any) returns Future.successful(Results.Ok("render"))
       // Build ParSeq Trace
       val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl
-      val result: Future[Result] = playParSeqTraceImpl.build(Future.successful(Results.NotFound("origin")), mock[RequestHeader], mockStore, mockTraceSensor, mockTraceRenderer)
+      val result: Future[Result] = playParSeqTraceImpl.build(Future.successful(Results.NotFound("origin")), mockStore, mockTraceSensor, mockTraceRenderer)(mock[RequestHeader])
       // Assert the status and the content
       status(result) must equalTo(NOT_FOUND)
       contentType(result) must beSome("text/plain")

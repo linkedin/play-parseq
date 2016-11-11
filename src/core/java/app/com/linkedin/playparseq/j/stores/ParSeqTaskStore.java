@@ -28,10 +28,10 @@ public interface ParSeqTaskStore {
   /**
    * The method put puts ParSeq Task into store.
    *
-   * @param task The ParSeq Task
    * @param context The HTTP Context
+   * @param task The ParSeq Task
    */
-  void put(final Task<?> task, final Http.Context context);
+  void put(final Http.Context context, final Task<?> task);
 
   /**
    * The method get gets all Tasks from one request out of store as a Set.

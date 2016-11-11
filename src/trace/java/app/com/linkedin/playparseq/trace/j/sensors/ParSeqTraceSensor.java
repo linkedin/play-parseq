@@ -27,9 +27,9 @@ public interface ParSeqTraceSensor {
    * The method isEnabled decides whether ParSeq Trace is enabled or not from {@link Http.Context} and
    * {@link ParSeqTaskStore}.
    *
-   * @param parSeqTaskStore The {@link ParSeqTaskStore} for getting ParSeq Tasks
    * @param context The HTTP Context
+   * @param parSeqTaskStore The {@link ParSeqTaskStore} for getting ParSeq Tasks
    * @return The decision
    */
-  boolean isEnabled(final ParSeqTaskStore parSeqTaskStore, final Http.Context context);
+  boolean isEnabled(final Http.Context context, final ParSeqTaskStore parSeqTaskStore);
 }

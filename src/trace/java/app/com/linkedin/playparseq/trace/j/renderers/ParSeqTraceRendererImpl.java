@@ -63,7 +63,7 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
   }
 
   @Override
-  public F.Promise<Result> render(final ParSeqTaskStore parSeqTaskStore, final Http.Context context) {
+  public F.Promise<Result> render(final Http.Context context, final ParSeqTaskStore parSeqTaskStore) {
     return F.Promise.promise(() -> {
       Map<Long, ShallowTrace> traceMap = new HashMap<>();
       Set<TraceRelationship> relationships = new HashSet<>();
