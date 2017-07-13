@@ -14,6 +14,7 @@ package com.linkedin.playparseq.s
 import com.linkedin.parseq.function._
 import java.util.concurrent.Callable
 import java.util.function.{Consumer, Supplier}
+import scala.language.implicitConversions
 
 
 /**

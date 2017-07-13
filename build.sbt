@@ -1,10 +1,10 @@
-val playParSeqVersion = "0.5.8"
+val playParSeqVersion = "0.6.0"
 
-val playParSeqScalaVersion = "2.10.5"
+val playParSeqScalaVersion = "2.11.11"
 
-val playParSeqCrossScalaVersions = Seq("2.11.8", "2.10.6")
+val playParSeqCrossScalaVersions = Seq("2.11.11", "2.10.6")
 
-val parSeqVersion = "2.6.3"
+val parSeqVersion = "2.6.17"
 
 val commonsIoVersion = "2.4"
 
@@ -14,10 +14,7 @@ lazy val commonSettings = List(
   version := playParSeqVersion,
   organization := "com.linkedin.play-parseq",
   scalaVersion := playParSeqScalaVersion,
-  crossScalaVersions := playParSeqCrossScalaVersions,
-  resolvers ++= Seq(
-    "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
-  )
+  crossScalaVersions := playParSeqCrossScalaVersions
 )
 
 lazy val `play-parseq-root` =
@@ -28,6 +25,10 @@ lazy val `play-parseq-root` =
       `play-parseq-trace`,
       `play-parseq-trace-scala`,
       `play-parseq-sample`
+    )
+    .settings(
+      publishArtifact := false,
+      commonSettings
     )
 
 lazy val `play-parseq` =
@@ -84,11 +85,13 @@ lazy val `play-parseq-trace-scala` =
         specs2 % Test
       ),
       routesGenerator := InjectedRoutesGenerator,
-      update <<= (update, classDirectory in Compile) map { (updateReport, classDir) =>
+      update in Compile := {
+        val updateReport = (update in Compile).value
+        val classDir = (classDirectory in Compile).value
         if (!(classDir / "tracevis").exists) {
           println(s"[info] Extracting parseq-tracevis to $classDir")
           updateReport.select(artifact = artifactFilter(name = "parseq-tracevis", extension = "tar.gz")).foreach(
-            tarGz => <x>mkdir -p {classDir}</x> #&& <x>tar -zxf {tarGz.getAbsolutePath} -C {classDir}</x> !
+            tarGz => s"mkdir -p $classDir" #&& s"tar -zxf ${tarGz.getAbsolutePath} -C $classDir" !
           )
         }
         updateReport
@@ -110,7 +113,8 @@ lazy val `play-parseq-sample` =
         "com.linkedin.parseq" % "parseq-http-client" % parSeqVersion,
         specs2 % Test
       ),
-      routesGenerator := InjectedRoutesGenerator
+      routesGenerator := InjectedRoutesGenerator,
+      publishArtifact := false
     )
     .dependsOn(
       `play-parseq-trace`
