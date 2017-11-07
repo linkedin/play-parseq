@@ -22,10 +22,10 @@ import org.apache.commons.io.FileUtils
 import play.api.Configuration
 import play.api.Logger
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.{Action, AnyContent, Controller, Result}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process
+import scala.util.{Failure, Success, Try}
 
 
 /**
@@ -35,25 +35,31 @@ import scala.sys.process
  * @param engine The injected ParSeq Engine component
  * @param applicationLifecycle The injected ApplicationLifeCycle component
  * @param configuration The injected Configuration component
+ * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
 @Singleton
-class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: ApplicationLifecycle, configuration: Configuration) extends PlayParSeqHelper with Controller {
-  private val Log = Logger(this.getClass())
+class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: ApplicationLifecycle, configuration: Configuration)(implicit executionContext: ExecutionContext) extends PlayParSeqHelper with Controller {
+
+  /**
+   * A happy logger.
+   */
+  private val logger = Logger(classOf[ParSeqTraceViewer])
+
   /**
    * The field cachePath is the file path of the ParSeq Trace cache directory.
    */
-  lazy val cachePath: Path = Files.createTempDirectory("cache")
+  private lazy val cachePath: Path = Files.createTempDirectory("cache")
 
   /**
    * The field graphvizEngine is for generating graphviz files.
    */
-  lazy val graphvizEngine: GraphvizEngine = new GraphvizEngine(getDotLocation, cachePath, getCacheSize, getTimeoutMilliseconds, getParallelLevel, getDelayMilliseconds, getProcessQueueSize)
+  private lazy val graphvizEngine: GraphvizEngine = new GraphvizEngine(getDotLocation, cachePath, getCacheSize, getTimeoutMilliseconds, getParallelLevel, getDelayMilliseconds, getProcessQueueSize)
 
   /**
    * The field setup is for starting the GraphvizEngine and hooking cleanup to application lifecycle.
    */
-  lazy val setup = {
+  private lazy val setup = {
     // Start the GraphvizEngine
     graphvizEngine.start()
     // Add stop hook
@@ -114,21 +120,16 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The file path
    */
-  private[this] def getDotLocation: String = configuration.getString("parseq.trace.docLocation")
-    .getOrElse(
-      try {
-        System.getProperty("os.name").toLowerCase match {
-          case u if u.indexOf("mac") >=0 || u.indexOf("nix") >= 0 || u.indexOf("nux") >= 0 || u.indexOf("aix") >= 0 => process.stringToProcess("which dot").!!.trim
-          case w if w.indexOf("win") >= 0 => process.stringToProcess("where dot").!!.trim
-          case _ => ""
-        }
-      } catch {
-        case e: Exception => 
-          val ret = "No executable for dot found. See http://www.graphviz.org"
-          Log.error(ret)
-          ret
-      }
-    )
+  private[this] def getDotLocation: String = configuration.getString("parseq.trace.docLocation").getOrElse(Try {
+    System.getProperty("os.name").toLowerCase match {
+      case u if u.indexOf("mac") >= 0 || u.indexOf("nix") >= 0 || u.indexOf("nux") >= 0 || u.indexOf("aix") >= 0 => process.stringToProcess("which dot").!!.trim
+      case w if w.indexOf("win") >= 0 => process.stringToProcess("where dot").!!.trim
+      case _ => null
+    }
+  } match {
+    case Success(value) => value
+    case Failure(_) => logger.error("No executable for dot found. See http://www.graphviz.org."); null
+  })
 
   /**
    * The method getCacheSize gets the number of cache items in the GraphvizEngine from conf file, otherwise it will
@@ -136,8 +137,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The number of cache
    */
-  private[this] def getCacheSize: Int = configuration.getInt("parseq.trace.cacheSize")
-    .getOrElse(1024)
+  private[this] def getCacheSize: Int = configuration.getInt("parseq.trace.cacheSize").getOrElse(1024)
 
   /**
    * The method getTimeoutSeconds gets the timeout of the GraphvizEngine execution in the unit of milliseconds from conf
@@ -145,8 +145,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The timeout in milliseconds
    */
-  private[this] def getTimeoutMilliseconds: Long = configuration.getLong("parseq.trace.timeoutMilliseconds")
-    .getOrElse(5000)
+  private[this] def getTimeoutMilliseconds: Long = configuration.getLong("parseq.trace.timeoutMilliseconds").getOrElse(5000)
 
   /**
    * The method getParallelLevel gets the maximum of the GraphvizEngine's parallel level from conf file, otherwise it
@@ -154,8 +153,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The parallel level
    */
-  private[this] def getParallelLevel: Int = configuration.getInt("parseq.trace.parallelLevel")
-    .getOrElse(Runtime.getRuntime.availableProcessors)
+  private[this] def getParallelLevel: Int = configuration.getInt("parseq.trace.parallelLevel").getOrElse(Runtime.getRuntime.availableProcessors)
 
   /**
    * The method getDelayMilliseconds gets the delay time between different executions of the GraphvizEngine in the unit
@@ -163,8 +161,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The delay time in milliseconds
    */
-  private[this] def getDelayMilliseconds: Long = configuration.getLong("parseq.trace.delayMilliseconds")
-    .getOrElse(5)
+  private[this] def getDelayMilliseconds: Long = configuration.getLong("parseq.trace.delayMilliseconds").getOrElse(5)
 
   /**
    * The method getProcessQueueSize gets the size of the GraphvizEngine's process queue from conf file, otherwise it
@@ -172,6 +169,6 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The size of process queue
    */
-  private[this] def getProcessQueueSize: Int = configuration.getInt("parseq.trace.processQueueSize")
-    .getOrElse(1000)
+  private[this] def getProcessQueueSize: Int = configuration.getInt("parseq.trace.processQueueSize").getOrElse(1000)
+
 }

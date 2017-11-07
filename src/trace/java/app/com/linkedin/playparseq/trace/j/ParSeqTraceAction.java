@@ -14,8 +14,8 @@ package com.linkedin.playparseq.trace.j;
 import com.linkedin.playparseq.j.stores.ParSeqTaskStore;
 import com.linkedin.playparseq.trace.j.renderers.ParSeqTraceRenderer;
 import com.linkedin.playparseq.trace.j.sensors.ParSeqTraceSensor;
+import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
-import play.libs.F;
 import play.mvc.Action.Simple;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -62,23 +62,22 @@ public class ParSeqTraceAction extends Simple {
   public ParSeqTraceAction(final ParSeqTaskStore parSeqTaskStore, final ParSeqTraceBuilder parSeqTraceBuilder,
       final ParSeqTraceSensor parSeqTraceSensor, final ParSeqTraceRenderer parSeqTraceRenderer) {
     super();
-    this._parSeqTaskStore = parSeqTaskStore;
-    this._parSeqTraceBuilder = parSeqTraceBuilder;
-    this._parSeqTraceSensor = parSeqTraceSensor;
-    this._parSeqTraceRenderer = parSeqTraceRenderer;
+    _parSeqTaskStore = parSeqTaskStore;
+    _parSeqTraceBuilder = parSeqTraceBuilder;
+    _parSeqTraceSensor = parSeqTraceSensor;
+    _parSeqTraceRenderer = parSeqTraceRenderer;
   }
 
   /**
-   * The method call composes with {@link ParSeqTraceBuilder} to build ParSeq Trace for the request..
+   * The method call composes with {@link ParSeqTraceBuilder} to build ParSeq Trace for the request.
    *
    * @param context The HTTP Context
-   * @return The Play Promise of Result
-   * @throws Throwable The exception from show
+   * @return The CompletionStage of Result
    */
   @Override
-  public F.Promise<Result> call(final Http.Context context)
-      throws Throwable {
-    return _parSeqTraceBuilder
-        .build(context, delegate.call(context), _parSeqTaskStore, _parSeqTraceSensor, _parSeqTraceRenderer);
+  public CompletionStage<Result> call(final Http.Context context) {
+    return _parSeqTraceBuilder.build(context, delegate.call(context), _parSeqTaskStore, _parSeqTraceSensor,
+        _parSeqTraceRenderer);
   }
+
 }

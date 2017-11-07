@@ -18,7 +18,6 @@ import com.linkedin.playparseq.trace.j.renderers.ParSeqTraceRenderer;
 import com.linkedin.playparseq.trace.j.renderers.ParSeqTraceRendererImpl;
 import com.linkedin.playparseq.trace.j.sensors.ParSeqTraceSensor;
 import com.linkedin.playparseq.trace.j.sensors.ParSeqTraceSensorImpl;
-import com.linkedin.playparseq.trace.utils.ParSeqTraceHelper;
 import play.api.Configuration;
 import play.api.Environment;
 import play.api.inject.Binding;
@@ -28,8 +27,8 @@ import scala.collection.Seq;
 
 /**
  * The class ParSeqTraceModule is a preset Module for the dependency injection bindings of {@link ParSeqTraceAction}.
- * This {@link ParSeqTraceAction} configuration includes {@link ParSeqTraceBuilderImpl}, {@link ParSeqTraceSensorImpl},
- * {@link ParSeqTraceRendererImpl} and {@link ParSeqTraceHelper}.
+ * This {@link ParSeqTraceAction} configuration includes {@link ParSeqTraceBuilderImpl}, {@link ParSeqTraceSensorImpl}
+ * and {@link ParSeqTraceRendererImpl}.
  * The key `play.modules.enabled += "com.linkedin.playparseq.trace.j.modules.ParSeqTraceModule"` needs to be added into
  * your conf file, if you want to use this {@link ParSeqTraceAction} configuration.
  *
@@ -51,4 +50,5 @@ public class ParSeqTraceModule extends Module {
         bind(ParSeqTraceSensor.class).to(ParSeqTraceSensorImpl.class),
         bind(ParSeqTraceRenderer.class).to(ParSeqTraceRendererImpl.class));
   }
+
 }

@@ -17,11 +17,10 @@ import com.linkedin.playparseq.trace.utils.ParSeqTraceBaseVisualizer
 import javax.inject.{Inject, Singleton}
 import play.api.Environment
 import play.api.http.HttpConfiguration
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.{RequestHeader, Result, Results}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
@@ -40,19 +39,24 @@ trait ParSeqTraceRenderer {
    * @return The Future of Result
    */
   def render(parSeqTaskStore: ParSeqTaskStore)(implicit requestHeader: RequestHeader): Future[Result]
+
 }
 
 /**
  * The class ParSeqTraceRendererImpl is an implementation of the trait [[ParSeqTraceRenderer]] with the help from the
  * class [[ParSeqTraceBaseVisualizer]].
  *
- * @param environment The injected Environment component
- * @param httpConfiguration The injected HttpConfiguration component
+ * @param environment The injected [[Environment]] component
+ * @param httpConfiguration The injected [[HttpConfiguration]] component
+ * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
 @Singleton
-class ParSeqTraceRendererImpl @Inject()(environment: Environment, httpConfiguration: HttpConfiguration) extends ParSeqTraceBaseVisualizer with ParSeqTraceRenderer {
+class ParSeqTraceRendererImpl @Inject()(environment: Environment, httpConfiguration: HttpConfiguration)(implicit executionContext: ExecutionContext) extends ParSeqTraceBaseVisualizer with ParSeqTraceRenderer {
 
+  /**
+   * @inheritdoc
+   */
   override def render(parSeqTaskStore: ParSeqTaskStore)(implicit requestHeader: RequestHeader): Future[Result] =
     Future {
       val traces: mutable.Set[Trace] = parSeqTaskStore.get.map(_.getTrace)
@@ -62,4 +66,5 @@ class ParSeqTraceRendererImpl @Inject()(environment: Environment, httpConfigurat
       Option(showTrace(new Trace(traceMap.asJava, relationships.asJava), environment, httpConfiguration)).map(Results.Ok(_).as("text/html"))
         .getOrElse(Results.InternalServerError("Can't show Trace."))
     }
+
 }

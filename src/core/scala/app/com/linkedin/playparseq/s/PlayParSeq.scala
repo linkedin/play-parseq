@@ -12,11 +12,14 @@
 package com.linkedin.playparseq.s
 
 import com.linkedin.parseq.{Engine, Task}
+import com.linkedin.parseq.promise.Promises
+import com.linkedin.playparseq.s.PlayParSeqImplicits._
 import com.linkedin.playparseq.s.stores.ParSeqTaskStore
 import com.linkedin.playparseq.utils.PlayParSeqHelper
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.RequestHeader
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 
 /**
@@ -57,6 +60,7 @@ trait PlayParSeq {
    * @return The Future
    */
   def runTask[T](task: Task[T])(implicit requestHeader: RequestHeader): Future[T]
+
 }
 
 /**
@@ -65,25 +69,42 @@ trait PlayParSeq {
  *
  * @param engine The injected ParSeq Engine component
  * @param parSeqTaskStore The injected [[ParSeqTaskStore]] component
+ * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
 @Singleton
-class PlayParSeqImpl @Inject()(engine: Engine, parSeqTaskStore: ParSeqTaskStore) extends PlayParSeqHelper with PlayParSeq {
+class PlayParSeqImpl @Inject()(engine: Engine, parSeqTaskStore: ParSeqTaskStore)(implicit executionContext: ExecutionContext) extends PlayParSeqHelper with PlayParSeq {
 
   /**
    * The field DefaultTaskName is the default name of ParSeq Task.
    */
   val DefaultTaskName = "fromScalaFuture"
 
+  /**
+   * @inheritdoc
+   */
   override def toTask[T](name: String, f: () => Future[T]): Task[T] = {
-    // Bind a Task to the Future
-    bindFutureToTask(name, f)
+    // Bind a Task to the Future for both success and failure
+    Task.async[T](name, {
+      val promise = Promises.settable[T]()
+      f().onComplete {
+        case Failure(throwable) => promise.fail(throwable)
+        case Success(result) => promise.done(result)
+      }
+      promise
+    })
   }
 
+  /**
+   * @inheritdoc
+   */
   override def toTask[T](f: () => Future[T]): Task[T] = {
     toTask(DefaultTaskName, f)
   }
 
+  /**
+   * @inheritdoc
+   */
   override def runTask[T](task: Task[T])(implicit requestHeader: RequestHeader): Future[T] = {
     // Bind a Future to the ParSeq Task
     val future: Future[T] = bindTaskToFuture(task)
@@ -94,4 +115,5 @@ class PlayParSeqImpl @Inject()(engine: Engine, parSeqTaskStore: ParSeqTaskStore)
     // Return the Future
     future
   }
+
 }

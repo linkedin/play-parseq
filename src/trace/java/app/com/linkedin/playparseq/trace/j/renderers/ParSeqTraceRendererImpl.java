@@ -21,11 +21,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import play.api.http.HttpConfiguration;
 import play.Environment;
-import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -58,13 +59,16 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
    */
   @Inject
   public ParSeqTraceRendererImpl(final Environment environment, final HttpConfiguration httpConfiguration) {
-    this._environment = environment;
-    this._httpConfiguration = httpConfiguration;
+    _environment = environment;
+    _httpConfiguration = httpConfiguration;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
-  public F.Promise<Result> render(final Http.Context context, final ParSeqTaskStore parSeqTaskStore) {
-    return F.Promise.promise(() -> {
+  public CompletionStage<Result> render(final Http.Context context, final ParSeqTaskStore parSeqTaskStore) {
+    return CompletableFuture.supplyAsync(() -> {
       Map<Long, ShallowTrace> traceMap = new HashMap<>();
       Set<TraceRelationship> relationships = new HashSet<>();
       // Get all Tasks from the request out of the store and combine all Trace information
@@ -74,8 +78,10 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
         relationships.addAll(trace.getRelationships());
       });
       // Generate Result of ParSeq Trace
-      return Optional.ofNullable(showTrace(new Trace(traceMap, relationships), _environment.underlying(), _httpConfiguration))
+      return Optional.ofNullable(
+          showTrace(new Trace(traceMap, relationships), _environment.underlying(), _httpConfiguration))
           .map(s -> Results.ok(s).as("text/html")).orElse(Results.internalServerError("Can't show Trace."));
     });
   }
+
 }

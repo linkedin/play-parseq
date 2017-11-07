@@ -2,15 +2,15 @@
 
 Play-ParSeq is a Play module which seamlessly integrates [ParSeq](https://github.com/linkedin/parseq) with Play Framework.
 
-ParSeq is a Java framework for writing async code, which has several advantages over Play F.Promise or Scala Future, e.g. ParSeq Trace for async code's runtime visualization, async code reuse via Task composition and taking control of async code's lifecycle.
+ParSeq is a Java framework for writing async code, which has several advantages over Java CompletionStage or Scala Future, e.g. ParSeq Trace for async code's runtime visualization, async code reuse via Task composition and taking control of async code's lifecycle.
 
 Key features:
 
-* Executes ParSeq `Task` and generates Java Play `F.Promise` or Scala `Future`, which allows ParSeq Tasks to be used for executing Play Action.
-* Converts from Java `Callable<F.Promise<T>>` or Scala `() => Future[T]` to ParSeq `Task`, which allows existing code using Play native APIs to be integrated with ParSeq Tasks.
+* Executes ParSeq `Task` and generates Java `CompletionStage` or Scala `Future`, which allows ParSeq Tasks to be used for executing Play Action.
+* Converts from Java `Callable<CompletionStage<T>>` or Scala `() => Future[T]` to ParSeq `Task`, which allows existing code using Play native APIs to be integrated with ParSeq Tasks.
 * Supports [ParSeq Trace](https://github.com/linkedin/parseq/wiki/Tracing).
 * Provides both Scala and Java API.
-* Requires Play 2.4 (Dependency Injection).
+* Requires Play 2.5 (Dependency Injection).
 
 ## Getting Play-ParSeq
 
@@ -20,15 +20,7 @@ Key features:
 
 ### Core Java
 
-1. Set the injected router for your build setting in your `build.sbt`.
-
-    ```
-    ...
-    routesGenerator := InjectedRoutesGenerator
-    ...
-    ```
-
-2. Put the preset module `PlayParSeqModule` into your `application.conf`.
+1. Put the preset module `PlayParSeqModule` into your `application.conf`.
 
     ```
     ...
@@ -36,27 +28,26 @@ Key features:
     ...
     ```
 
-3. Inject `PlayParSeq` into your Controller.
+2. Inject `PlayParSeq` into your Controller.
 
     ```java
     ...
     private final PlayParSeq _playParSeq;
     @Inject
     public Sample(final PlayParSeq playParSeq) {
-        this._playParSeq = playParSeq;
+        _playParSeq = playParSeq;
     ...
     ```
 
-4. Use `PlayParSeq` in your Action.
+3. Use `PlayParSeq` in your Action.
 
     ```java
     ...
-    public F.Promise<Result> demo() {
+    public CompletionStage<Result> demo() {
         // Convert to ParSeq Task
-        Task<String> helloworldTask = _playParSeq.toTask("helloworld", () -> F.Promise.pure("Hello World"));
+        Task<String> helloworldTask = _playParSeq.toTask("helloworld", () -> CompletableFuture.completedFuture("Hello World"));
         // Run the Task
-        return _playParSeq.runTask(Http.Context.current(), helloworldTask)
-            .map(Results::ok);
+        return _playParSeq.runTask(Http.Context.current(), helloworldTask).map(Results::ok);
     }
     ...
     ```
@@ -84,7 +75,7 @@ Key features:
     ```java
     ...
     @With(ParSeqTraceAction.class)
-    public F.Promise<Result> demo() {
+    public CompletionStage<Result> demo() {
     ...
     ```
 
@@ -92,15 +83,7 @@ Key features:
 
 ### Core Scala
 
-1. Set the injected router for your build setting in your `build.sbt`.
-
-    ```
-    ...
-    routesGenerator := InjectedRoutesGenerator
-    ...
-    ```
-
-2. Put the preset module `PlayParSeqModule` into your `application.conf`.
+1. Put the preset module `PlayParSeqModule` into your `application.conf`.
 
     ```
     ...
@@ -108,7 +91,7 @@ Key features:
     ...
     ```
 
-3. Inject `PlayParSeq` into your Controller.
+2. Inject `PlayParSeq` into your Controller.
 
     ```scala
     ...
@@ -116,7 +99,7 @@ Key features:
     ...
     ```
 
-4. Use `PlayParSeq` in your Action.
+3. Use `PlayParSeq` in your Action.
 
     ```scala
     ...

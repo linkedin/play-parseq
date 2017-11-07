@@ -11,45 +11,68 @@
  */
 package com.linkedin.playparseq.trace.j;
 
+import akka.stream.Materializer;
 import com.linkedin.parseq.Task;
 import com.linkedin.playparseq.j.stores.ParSeqTaskStore;
 import com.linkedin.playparseq.trace.j.renderers.ParSeqTraceRenderer;
 import com.linkedin.playparseq.trace.j.sensors.ParSeqTraceSensor;
-import com.linkedin.playparseq.trace.utils.ParSeqTraceHelper;
+import com.linkedin.playparseq.trace.utils.PlayParSeqTraceHelper;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import javax.inject.Singleton;
-import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Result;
 
 
 /**
  * The class ParSeqTraceBuilderImpl is an implementation of {@link ParSeqTraceBuilder} with the help from the class
- * {@link ParSeqTraceHelper}.
+ * {@link PlayParSeqTraceHelper}.
  *
  * @author Yinan Ding (yding@linkedin.com)
  */
 @Singleton
-public class ParSeqTraceBuilderImpl extends ParSeqTraceHelper implements ParSeqTraceBuilder {
+public class ParSeqTraceBuilderImpl extends PlayParSeqTraceHelper implements ParSeqTraceBuilder {
 
+  /**
+   * The field _materializer is an Akka Materializer for consuming result body stream.
+   */
+  private final Materializer _materializer;
+
+  /**
+   * The constructor injects the Materializer.
+   *
+   * @param materializer The injected Materializer component
+   */
+  @Inject
+  public ParSeqTraceBuilderImpl(final Materializer materializer) {
+    _materializer = materializer;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   @Override
-  public F.Promise<Result> build(final Http.Context context, final F.Promise<Result> origin,
-      final ParSeqTaskStore parSeqTaskStore, final ParSeqTraceSensor parSeqTraceSensor,
-      final ParSeqTraceRenderer parSeqTraceRenderer) {
+  public CompletionStage<Result> build(final Http.Context context, final CompletionStage<Result> origin,
+                                       final ParSeqTaskStore parSeqTaskStore, final ParSeqTraceSensor parSeqTraceSensor,
+                                       final ParSeqTraceRenderer parSeqTraceRenderer) {
     // Sense
     if (parSeqTraceSensor.isEnabled(context, parSeqTaskStore)) {
       // Bind independent Tasks
-      Set<F.Promise<Object>> promises =
-          parSeqTaskStore.get(context).stream().map(t -> F.Promise.wrap(bindTaskToFuture((Task<Object>) t)))
-              .collect(Collectors.toSet());
+      Set<CompletionStage<Object>> completionStages = parSeqTaskStore.get(context).stream()
+          .map(t -> bindTaskToCompletionStage((Task<Object>) t)).collect(Collectors.toSet());
       // Consume the origin
-      promises.add(origin.flatMap(r -> F.Promise.wrap(consumeResult(r.toScala()))));
-      // Render
-      return F.Promise.sequence(promises).flatMap(list -> parSeqTraceRenderer.render(context, parSeqTaskStore));
+      completionStages.add(origin.thenComposeAsync(r -> consumeResult(r, _materializer)));
+      // Combine all CompletionStages into one, which is completed when all CompletionStages complete, then render
+      return CompletableFuture.allOf(
+          completionStages.stream().map(CompletionStage::toCompletableFuture).toArray(CompletableFuture[]::new))
+          .thenComposeAsync(__ -> parSeqTraceRenderer.render(context, parSeqTaskStore));
     } else {
       return origin;
     }
   }
+
 }

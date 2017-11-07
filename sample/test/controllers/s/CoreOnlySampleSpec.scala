@@ -37,9 +37,8 @@ class CoreOnlySampleSpec extends PlaySpecification {
   val TestStartIndexFail = 5
 
   "The CoreOnlySample" should {
-
     "respond to GET input" in new WithApplication {
-      val result = route(FakeRequest(GET, routes.CoreOnlySample.input().url)).get
+      val result = route(app, FakeRequest(GET, routes.CoreOnlySample.input().url)).get
       // Assert the status and the content
       status(result) must equalTo(OK)
       contentType(result) must beSome("text/html")
@@ -47,7 +46,7 @@ class CoreOnlySampleSpec extends PlaySpecification {
     }
 
     "respond to GET demo" in new WithApplication {
-      val result = route(FakeRequest(GET, routes.CoreOnlySample.demo(TextText, TestStartIndex).url)).get
+      val result = route(app, FakeRequest(GET, routes.CoreOnlySample.demo(TextText, TestStartIndex).url)).get
       // Assert the status and the content
       status(result) must equalTo(OK)
       contentType(result) must beSome("text/plain")
@@ -55,11 +54,12 @@ class CoreOnlySampleSpec extends PlaySpecification {
     }
 
     "respond to GET demo with invalid start index" in new WithApplication {
-      val result = route(FakeRequest(GET, routes.CoreOnlySample.demo(TextText, TestStartIndexFail).url)).get
+      val result = route(app, FakeRequest(GET, routes.CoreOnlySample.demo(TextText, TestStartIndexFail).url)).get
       // Assert the status and the content
       status(result) must equalTo(OK)
       contentType(result) must beSome("text/plain")
-      contentAsString(result) must equalTo(new CoreOnlySample(null).DefaultFailure)
+      contentAsString(result) must equalTo(new CoreOnlySample(null)(null).DefaultFailure)
     }
   }
+
 }

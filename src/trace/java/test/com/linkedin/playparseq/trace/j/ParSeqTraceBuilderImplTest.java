@@ -11,12 +11,16 @@
  */
 package com.linkedin.playparseq.trace.j;
 
+import akka.Done$;
+import akka.stream.Materializer;
+import com.linkedin.playparseq.j.PlayParSeqImplTest;
 import com.linkedin.playparseq.j.stores.ParSeqTaskStore;
 import com.linkedin.playparseq.trace.j.renderers.ParSeqTraceRenderer;
 import com.linkedin.playparseq.trace.j.sensors.ParSeqTraceSensor;
 import java.util.HashSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.junit.Test;
-import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -37,12 +41,6 @@ import static play.test.Helpers.*;
 public class ParSeqTraceBuilderImplTest {
 
   /**
-   * The field DEFAULT_TIME_OUT is the default time out value for retrieving data from Play Promise in the unit of
-   * milliseconds.
-   */
-  public final static int DEFAULT_TIME_OUT = 5000;
-
-  /**
    * The method canBuildTrace tests the ability of building ParSeq Trace.
    */
   @Test
@@ -56,16 +54,20 @@ public class ParSeqTraceBuilderImplTest {
     when(mockTraceSensor.isEnabled(any(Http.Context.class), any(ParSeqTaskStore.class))).thenReturn(true);
     // Mock ParSeqTraceRenderer
     ParSeqTraceRenderer mockTraceRenderer = mock(ParSeqTraceRenderer.class);
-    when(mockTraceRenderer.render(any(Http.Context.class), any(ParSeqTaskStore.class)))
-        .thenReturn(F.Promise.pure(ok(render)));
+    when(mockTraceRenderer.render(any(Http.Context.class), any(ParSeqTaskStore.class))).thenReturn(
+        CompletableFuture.completedFuture(ok(render)));
+    // Mock Materializer
+    Materializer mockMaterializer = mock(Materializer.class);
+    when(mockMaterializer.<CompletionStage<Done$>>materialize(any())).thenReturn(
+        CompletableFuture.completedFuture(Done$.MODULE$));
     // Build ParSeq Trace
-    ParSeqTraceBuilderImpl playParSeqTraceImpl = new ParSeqTraceBuilderImpl();
-    Result result =
-        playParSeqTraceImpl.build(mock(Http.Context.class), F.Promise.pure(notFound("origin")), mockStore,
-            mockTraceSensor, mockTraceRenderer).get(DEFAULT_TIME_OUT);
+    ParSeqTraceBuilderImpl playParSeqTraceImpl = new ParSeqTraceBuilderImpl(mockMaterializer);
+    Result result = PlayParSeqImplTest.getResultUnchecked(
+        playParSeqTraceImpl.build(mock(Http.Context.class), CompletableFuture.completedFuture(notFound("origin")),
+            mockStore, mockTraceSensor, mockTraceRenderer));
     // Assert the status and the content
     assertEquals(OK, result.status());
-    assertEquals("text/plain", result.contentType());
+    assertEquals("text/plain", result.contentType().orElse(""));
     assertEquals(render, contentAsString(result));
   }
 
@@ -83,16 +85,21 @@ public class ParSeqTraceBuilderImplTest {
     when(mockTraceSensor.isEnabled(any(Http.Context.class), any(ParSeqTaskStore.class))).thenReturn(false);
     // Mock ParSeqTraceRenderer
     ParSeqTraceRenderer mockTraceRenderer = mock(ParSeqTraceRenderer.class);
-    when(mockTraceRenderer.render(any(Http.Context.class), any(ParSeqTaskStore.class)))
-        .thenReturn(F.Promise.pure(ok("render")));
+    when(mockTraceRenderer.render(any(Http.Context.class), any(ParSeqTaskStore.class))).thenReturn(
+        CompletableFuture.completedFuture(ok("render")));
+    // Mock Materializer
+    Materializer mockMaterializer = mock(Materializer.class);
+    when(mockMaterializer.<CompletionStage<Done$>>materialize(any())).thenReturn(
+        CompletableFuture.completedFuture(Done$.MODULE$));
     // Build ParSeq Trace
-    ParSeqTraceBuilderImpl playParSeqTraceImpl = new ParSeqTraceBuilderImpl();
-    Result result =
-        playParSeqTraceImpl.build(mock(Http.Context.class), F.Promise.pure(notFound(origin)), mockStore,
-            mockTraceSensor, mockTraceRenderer).get(DEFAULT_TIME_OUT);
+    ParSeqTraceBuilderImpl playParSeqTraceImpl = new ParSeqTraceBuilderImpl(mockMaterializer);
+    Result result = PlayParSeqImplTest.getResultUnchecked(
+        playParSeqTraceImpl.build(mock(Http.Context.class), CompletableFuture.completedFuture(notFound(origin)),
+            mockStore, mockTraceSensor, mockTraceRenderer));
     // Assert the status and the content
     assertEquals(NOT_FOUND, result.status());
-    assertEquals("text/plain", result.contentType());
+    assertEquals("text/plain", result.contentType().orElse(""));
     assertEquals(origin, contentAsString(result));
   }
+
 }

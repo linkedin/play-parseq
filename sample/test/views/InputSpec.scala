@@ -14,6 +14,7 @@ package views
 import play.api.test.{PlaySpecification, WithApplication}
 import play.twirl.api.Content
 
+
 /**
  * The class InputSpec is a specification class for input view template.
  *
@@ -29,4 +30,5 @@ class InputSpec extends PlaySpecification {
       contentAsString(html) must contain("Text")
     }
   }
+
 }

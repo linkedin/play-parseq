@@ -22,13 +22,13 @@ import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 class SingleTaskSampleSpec extends PlaySpecification{
 
   "The SingleTaskSample" should {
-
     "respond to GET demo" in new WithApplication {
-      val result = route(FakeRequest(GET, routes.SingleTaskSample.demo().url)).get
+      val result = route(app, FakeRequest(GET, routes.SingleTaskSample.demo().url)).get
       // Assert the status and the content
       status(result) must equalTo(OK)
       contentType(result) must beSome("text/plain")
       contentAsString(result) must equalTo("Hello World")
     }
   }
+
 }

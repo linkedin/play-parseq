@@ -87,4 +87,5 @@ abstract class ParSeqTraceBaseVisualizer {
       Source.fromInputStream(stream).mkString.replace("<title>", script + "\n<title>").replace("</style>", "</style>\n" + json)
     }).orNull
   }
+
 }

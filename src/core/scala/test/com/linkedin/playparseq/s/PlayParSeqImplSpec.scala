@@ -17,6 +17,7 @@ import com.linkedin.playparseq.s.stores.ParSeqTaskStore
 import java.util.concurrent.{Executors, ExecutorService, ScheduledExecutorService, TimeUnit}
 import org.specs2.mock.Mockito
 import org.specs2.specification.BeforeAfterEach
+import play.api.libs.concurrent.Execution
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.RequestHeader
 import play.api.test.PlaySpecification
@@ -33,22 +34,22 @@ class PlayParSeqImplSpec extends PlaySpecification with BeforeAfterEach with Moc
   /**
    * The field playParSeqImpl is the [[PlayParSeqImpl]] to be tested.
    */
-  private[this] var playParSeqImpl: PlayParSeqImpl = null
+  private[this] var playParSeqImpl: PlayParSeqImpl = _
 
   /**
    * The field engine is a ParSeq Engine for running ParSeq Task.
    */
-  private[this] var engine: Engine = null
+  private[this] var engine: Engine = _
 
   /**
    * The field taskScheduler is a task scheduler for ParSeq Engine.
    */
-  private[this] var taskScheduler: ExecutorService = null
+  private[this] var taskScheduler: ExecutorService = _
 
   /**
    * The field timerScheduler is a timer scheduler for ParSeq Engine.
    */
-  private[this] var timerScheduler: ScheduledExecutorService = null
+  private[this] var timerScheduler: ScheduledExecutorService = _
 
   /**
    * The field requestHeader is a mock RequestHeader for running Tasks.
@@ -60,11 +61,11 @@ class PlayParSeqImplSpec extends PlaySpecification with BeforeAfterEach with Moc
    *
    * @see <a href="https://github.com/linkedin/parseq/wiki/User's-Guide#creating-an-engine">ParSeq Wiki</a>
    */
-  def before = {
+  def before: Any = {
     taskScheduler = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors + 1)
     timerScheduler = Executors.newSingleThreadScheduledExecutor
     engine = new EngineBuilder().setTaskExecutor(taskScheduler).setTimerScheduler(timerScheduler).build
-    playParSeqImpl = new PlayParSeqImpl(engine, mock[ParSeqTaskStore])
+    playParSeqImpl = new PlayParSeqImpl(engine, mock[ParSeqTaskStore])(Execution.defaultContext)
   }
 
   /**
@@ -72,7 +73,7 @@ class PlayParSeqImplSpec extends PlaySpecification with BeforeAfterEach with Moc
    *
    * @see <a href="https://github.com/linkedin/parseq/wiki/User's-Guide#creating-an-engine">ParSeq Wiki</a>
    */
-  def after = {
+  def after: Any = {
     engine.shutdown()
     engine.awaitTermination(1, TimeUnit.SECONDS)
     taskScheduler.shutdown()
@@ -80,7 +81,6 @@ class PlayParSeqImplSpec extends PlaySpecification with BeforeAfterEach with Moc
   }
 
   "The PlayParSeqImpl" should {
-
     "be able to convert to a ParSeq Task with given name" in {
       val name: String = "test"
       // Convert
@@ -118,7 +118,7 @@ class PlayParSeqImplSpec extends PlaySpecification with BeforeAfterEach with Moc
         playParSeqImpl.toTask(
           "substring",
           () => Future { test.substring(start) })
-      ).recover { case t => recover }
+      ).recover { case _ => recover }
       // Assert the result from the Future which should be the recover value
       await(substringFuture) must equalTo(recover)
     }
@@ -159,7 +159,7 @@ class PlayParSeqImplSpec extends PlaySpecification with BeforeAfterEach with Moc
           Task.callable(
             "substring",
             test.substring(start))
-        ).recover { case t => recover }
+        ).recover { case _ => recover }
       // Assert the result from the Future which should be the recover value
       await(substringFuture) must equalTo(recover)
     }
@@ -178,4 +178,5 @@ class PlayParSeqImplSpec extends PlaySpecification with BeforeAfterEach with Moc
       await(substringFuture) must throwA[StringIndexOutOfBoundsException]
     }
   }
+
 }

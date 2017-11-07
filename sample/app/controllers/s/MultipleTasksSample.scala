@@ -18,10 +18,9 @@ import com.linkedin.playparseq.s.PlayParSeqImplicits._
 import com.linkedin.playparseq.trace.s.ParSeqTraceAction
 import com.ning.http.client.Response
 import javax.inject.Inject
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, AnyContent, Controller}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
@@ -31,9 +30,10 @@ import scala.concurrent.Future
  * @param ws The injected WSClient component
  * @param playParSeq The injected [[PlayParSeq]] component
  * @param parSeqTraceAction The injected [[ParSeqTraceAction]] component
+ * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
-class MultipleTasksSample @Inject()(ws: WSClient, playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction) extends Controller {
+class MultipleTasksSample @Inject()(ws: WSClient, playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction)(implicit executionContext: ExecutionContext) extends Controller {
 
   /**
    * The method demo runs two independent Tasks, and is able to show the ParSeq Trace if the request has
@@ -72,4 +72,5 @@ class MultipleTasksSample @Inject()(ws: WSClient, playParSeq: PlayParSeq, parSeq
    * @return The ParSeq Task
    */
   private[this] def getLengthTask(url: String): Task[Int] = HttpClient.get(url).task().map(url, (r: Response) => r.getResponseBody.length)
+
 }

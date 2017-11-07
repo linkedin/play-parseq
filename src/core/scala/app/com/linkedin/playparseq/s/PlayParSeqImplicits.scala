@@ -13,7 +13,7 @@ package com.linkedin.playparseq.s
 
 import com.linkedin.parseq.function._
 import java.util.concurrent.Callable
-import java.util.function.{Consumer, Supplier}
+import java.util.function.{Consumer, Function => JavaFunction, Supplier}
 import scala.language.implicitConversions
 
 
@@ -459,7 +459,7 @@ object PlayParSeqImplicits {
    */
   implicit def toAction(f: => Unit): Action =
     new Action {
-      override def run() = f
+      override def run(): Unit = f
     }
 
   /**
@@ -483,7 +483,7 @@ object PlayParSeqImplicits {
    */
   implicit def toConsumer[T](f: (T) => Any): Consumer[T] =
     new Consumer[T] {
-      override def accept(t: T) = f(t)
+      override def accept(t: T): Unit = f(t)
     }
 
   /**
@@ -497,4 +497,18 @@ object PlayParSeqImplicits {
     new Supplier[R] {
       override def get: R = f
     }
+
+  /**
+    * The method toFunction converts a function `(T) => R` to a Java `Function[T, R]`.
+    *
+    * @param f The function
+    * @tparam T The type parameter of the first function parameter
+    * @tparam R The type parameter of the second function parameter
+    * @return The Function
+    */
+  implicit def toFunction[T, R](f: (T) => R): JavaFunction[T, R] =
+    new JavaFunction[T, R] {
+      override def apply(t: T): R = f(t)
+    }
+
 }

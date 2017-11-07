@@ -14,6 +14,7 @@ package views
 import play.api.test.{PlaySpecification, WithApplication}
 import play.twirl.api.Content
 
+
 /**
  * The class IndexSpec is a specification class for index view template.
  *
@@ -29,4 +30,5 @@ class IndexSpec extends PlaySpecification {
       contentAsString(html) must contain("Sample")
     }
   }
+
 }

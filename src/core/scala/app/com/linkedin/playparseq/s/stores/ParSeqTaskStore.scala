@@ -45,6 +45,7 @@ trait ParSeqTaskStore {
    * @return A set of Tasks
    */
   def get(implicit requestHeader: RequestHeader): mutable.Set[Task[_]]
+
 }
 
 /**
@@ -63,13 +64,19 @@ class ParSeqTaskStoreImpl extends ParSeqTaskStore {
    */
   val ArgumentsKey = "ParSeqTasks"
 
-  override def put(task: Task[_])(implicit requestHeader: RequestHeader) = {
+  /**
+   * @inheritdoc
+   */
+  override def put(task: Task[_])(implicit requestHeader: RequestHeader): Unit = {
     requestHeader match {
-      case ctx: ContextRequest[_] => this.get.add(task)
+      case _: ContextRequest[_] => get.add(task)
       case _ =>
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   override def get(implicit requestHeader: RequestHeader): mutable.Set[Task[_]] = {
     requestHeader match {
       case ctx: ContextRequest[_] => ctx.args.get(ArgumentsKey).map(_.asInstanceOf[mutable.Set[Task[_]]])
@@ -80,6 +87,7 @@ class ParSeqTaskStoreImpl extends ParSeqTaskStore {
       case _ => mutable.Set.empty
     }
   }
+
 }
 
 /**

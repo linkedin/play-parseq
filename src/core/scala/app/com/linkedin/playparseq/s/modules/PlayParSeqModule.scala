@@ -14,15 +14,14 @@ package com.linkedin.playparseq.s.modules
 import com.linkedin.parseq.Engine
 import com.linkedin.playparseq.s.{PlayParSeq, PlayParSeqImpl}
 import com.linkedin.playparseq.s.stores.{ParSeqTaskStore, ParSeqTaskStoreImpl}
-import com.linkedin.playparseq.utils.{EngineProvider, PlayParSeqHelper}
+import com.linkedin.playparseq.utils.EngineProvider
 import play.api.{Configuration, Environment}
 import play.api.inject.{Binding, Module}
 
 
 /**
  * The class PlayParSeqModule is a preset Module for the dependency injection bindings of [[PlayParSeq]].
- * This [[PlayParSeq]] configuration includes [[PlayParSeqImpl]], [[ParSeqTaskStoreImpl]], [[EngineProvider]] and
- * [[PlayParSeqHelper]].
+ * This [[PlayParSeq]] configuration includes [[PlayParSeqImpl]], [[ParSeqTaskStoreImpl]] and [[EngineProvider]].
  * The key `play.modules.enabled += "com.linkedin.playparseq.s.modules.PlayParSeqModule"` needs to be added into your
  * conf file, if you want to use this [[PlayParSeq]] configuration.
  *
@@ -41,4 +40,5 @@ class PlayParSeqModule extends Module {
     bind[PlayParSeq].to[PlayParSeqImpl],
     bind[ParSeqTaskStore].to[ParSeqTaskStoreImpl],
     bind[Engine].toProvider[EngineProvider])
+
 }

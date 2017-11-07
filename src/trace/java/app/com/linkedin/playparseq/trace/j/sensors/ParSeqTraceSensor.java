@@ -32,4 +32,5 @@ public interface ParSeqTraceSensor {
    * @return The decision
    */
   boolean isEnabled(final Http.Context context, final ParSeqTaskStore parSeqTaskStore);
+
 }

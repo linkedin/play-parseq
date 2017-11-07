@@ -16,9 +16,8 @@ import com.linkedin.playparseq.s.PlayParSeq
 import com.linkedin.playparseq.s.PlayParSeqImplicits._
 import javax.inject.Inject
 import com.linkedin.playparseq.trace.s.ParSeqTraceAction
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.{Action, AnyContent, Controller}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
@@ -27,9 +26,10 @@ import scala.concurrent.Future
  *
  * @param playParSeq The injected [[PlayParSeq]] component
  * @param parSeqTraceAction The injected [[ParSeqTraceAction]] component
+ * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
-class SingleTaskSample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction) extends Controller {
+class SingleTaskSample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction)(implicit executionContext: ExecutionContext) extends Controller {
 
   /**
    * The method demo runs one Task, and is able to show the ParSeq Trace if the request has `parseq-trace=true`.
@@ -49,4 +49,5 @@ class SingleTaskSample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParS
         Task.value("world", "World")
       ).map("concatenate", (h: String, w: String) => Ok(h + " " + w)))
   })
+
 }

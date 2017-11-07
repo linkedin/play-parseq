@@ -13,9 +13,8 @@ package controllers.s
 
 import com.linkedin.playparseq.s.PlayParSeq
 import javax.inject.Inject
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.mvc.{Action, Controller}
-import scala.concurrent.Future
+import play.api.mvc.{Action, AnyContent, Controller}
+import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
@@ -23,9 +22,10 @@ import scala.concurrent.Future
  * execution of ParSeq Task by substring jobs without enabling the ParSeq Trace feature.
  *
  * @param playParSeq The injected [[PlayParSeq]] component
+ * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
-class CoreOnlySample @Inject()(playParSeq: PlayParSeq) extends Controller {
+class CoreOnlySample @Inject()(playParSeq: PlayParSeq)(implicit executionContext: ExecutionContext) extends Controller {
 
   /**
    * The field DefaultFailure is the default failure output.
@@ -37,7 +37,7 @@ class CoreOnlySample @Inject()(playParSeq: PlayParSeq) extends Controller {
    *
    * @return The Action
    */
-  def input() = Action {
+  def input(): Action[AnyContent] = Action {
     Ok(views.html.input())
   }
 
@@ -51,7 +51,7 @@ class CoreOnlySample @Inject()(playParSeq: PlayParSeq) extends Controller {
    * @param start The substring start index
    * @return The Future of Action
    */
-  def demo(text: String, start: Int) = Action.async(implicit request => {
+  def demo(text: String, start: Int): Action[AnyContent] = Action.async(implicit request => {
     // Run the Task
     playParSeq.runTask(
       // Convert to ParSeq Task
@@ -62,4 +62,5 @@ class CoreOnlySample @Inject()(playParSeq: PlayParSeq) extends Controller {
           .recover { case _ => DefaultFailure }
           .map(Ok(_))))
   })
+
 }

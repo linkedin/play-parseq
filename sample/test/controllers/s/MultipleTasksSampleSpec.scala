@@ -22,13 +22,13 @@ import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 class MultipleTasksSampleSpec extends PlaySpecification {
 
   "The MultipleTasksSample" should {
-
     "respond to GET demo" in new WithApplication {
-      val result = route(FakeRequest(GET, routes.MultipleTasksSample.demo().url)).get
+      val result = route(app, FakeRequest(GET, routes.MultipleTasksSample.demo().url)).get
       // Assert the status and the content
       status(result) must equalTo(OK)
       contentType(result) must beSome("text/plain")
       contentAsString(result).toInt must greaterThan(0)
     }
   }
+
 }

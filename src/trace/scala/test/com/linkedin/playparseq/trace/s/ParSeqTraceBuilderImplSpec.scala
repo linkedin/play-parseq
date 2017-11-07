@@ -11,10 +11,13 @@
  */
 package com.linkedin.playparseq.trace.s
 
+import akka.Done
+import akka.stream.Materializer
 import com.linkedin.playparseq.s.stores.ParSeqTaskStore
 import com.linkedin.playparseq.trace.s.sensors.ParSeqTraceSensor
 import com.linkedin.playparseq.trace.s.renderers.ParSeqTraceRenderer
 import org.specs2.mock.Mockito
+import play.api.libs.concurrent.Execution
 import play.api.mvc.{RequestHeader, Result, Results}
 import play.api.test.PlaySpecification
 import scala.collection.mutable
@@ -40,8 +43,11 @@ class ParSeqTraceBuilderImplSpec extends PlaySpecification with Mockito {
       // Mock ParSeqTraceRenderer
       val mockTraceRenderer: ParSeqTraceRenderer = mock[ParSeqTraceRenderer]
       mockTraceRenderer.render(any)(any) returns Future.successful(Results.Ok(render))
+      // Mock Materializer
+      val mockMaterializer: Materializer = mock[Materializer]
+      mockMaterializer.materialize[Future[Done]](any) returns Future.successful(Done)
       // Build ParSeq Trace
-      val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl
+      val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl()(mockMaterializer, Execution.defaultContext)
       val result: Future[Result] = playParSeqTraceImpl.build(Future.successful(Results.NotFound("origin")), mockStore, mockTraceSensor, mockTraceRenderer)(mock[RequestHeader])
       // Assert the status and the content
       status(result) must equalTo(OK)
@@ -62,8 +68,11 @@ class ParSeqTraceBuilderImplSpec extends PlaySpecification with Mockito {
       // Mock ParSeqTraceRenderer
       val mockTraceRenderer: ParSeqTraceRenderer = mock[ParSeqTraceRenderer]
       mockTraceRenderer.render(any)(any) returns Future.successful(Results.Ok("render"))
+      // Mock Materializer
+      val mockMaterializier: Materializer = mock[Materializer]
+      mockMaterializier.materialize[Future[Done]](any) returns Future.successful(Done)
       // Build ParSeq Trace
-      val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl
+      val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl()(mockMaterializier, Execution.defaultContext)
       val result: Future[Result] = playParSeqTraceImpl.build(Future.successful(Results.NotFound("origin")), mockStore, mockTraceSensor, mockTraceRenderer)(mock[RequestHeader])
       // Assert the status and the content
       status(result) must equalTo(NOT_FOUND)
@@ -71,4 +80,5 @@ class ParSeqTraceBuilderImplSpec extends PlaySpecification with Mockito {
       contentAsString(result) must equalTo(origin)
     }
   }
+
 }
