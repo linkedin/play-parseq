@@ -12,46 +12,17 @@
 package com.linkedin.playparseq.utils
 
 import com.linkedin.parseq.Task
-import com.linkedin.parseq.promise.{Promise => ParSeqPromise, PromiseListener, Promises, SettablePromise}
-import java.util.concurrent.Callable
-import play.api.libs.concurrent.Execution.Implicits._
+import com.linkedin.parseq.promise.{Promise => ParSeqPromise, PromiseListener}
+import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.concurrent.{Future, Promise}
-import scala.util.{Failure, Success}
 
 
 /**
- * The class PlayParSeqHelper provides bindings between a `Future[T]` and a ParSeq `Task[T]`.
+ * The class PlayParSeqHelper provides bindings between a ParSeq `Task[T]` to a `Future[T]` or a `CompletionStage[T]`.
  *
  * @author Yinan Ding (yding@linkedin.com)
  */
 private[playparseq] abstract class PlayParSeqHelper {
-
-  /**
-   * The method bindFutureToTask binds a function `() => Future[T]` to a ParSeq `Task[T]`, for both success and failure.
-   *
-   * @param name The String which describes the Task and shows up in a trace
-   * @param f The function which returns a Future
-   * @tparam T The type parameter of the Future and the ParSeq Task
-   * @return The ParSeq Task
-   */
-  private[playparseq] def bindFutureToTask[T](name: String, f: () => Future[T]): Task[T] = {
-    // Create an asynchronous ParSeq Task
-    Task.async[T](name, new Callable[ParSeqPromise[_ <: T]] {
-      override def call(): ParSeqPromise[_ <: T] = {
-        // Create a binding ParSeq Promise
-        val parSeqPromise: SettablePromise[T] = Promises.settable[T]()
-        // Get the Future
-        val scalaFuture: Future[T] = f()
-        // Bind
-        scalaFuture.onComplete {
-          case Failure(t) => parSeqPromise.fail(t)
-          case Success(r) => parSeqPromise.done(r)
-        }
-        // Return the ParSeq Promise
-        parSeqPromise
-      }
-    })
-  }
 
   /**
    * The method bindTaskToFuture binds a `Future[T]` to a ParSeq `Task[T]`, for both success and failure.
@@ -64,13 +35,44 @@ private[playparseq] abstract class PlayParSeqHelper {
     // Create a Promise for extracting Future
     val scalaPromise: Promise[T] = Promise[T]()
     // Bind
-    task.addListener(new PromiseListener[T] {
-      override def onResolved(parSeqPromise: ParSeqPromise[T]) = {
-        if (parSeqPromise.isFailed) scalaPromise.failure(parSeqPromise.getError)
-        else scalaPromise.success(parSeqPromise.get)
-      }
-    })
+    addTaskListener(task, scalaPromise.success, scalaPromise.failure)
     // Return the Future
     scalaPromise.future
   }
+
+  /**
+   * The method bindTaskToCompletionStage binds a `CompletionStage[T]` to a ParSeq `Task[T]`, for both success and
+   * failure.
+   *
+   * @param task The ParSeq Task
+   * @tparam T The type parameter of the ParSeq Task and the CompletionStage
+   * @return The CompletionStage
+   */
+  private[playparseq] def bindTaskToCompletionStage[T](task: Task[T]): CompletionStage[T] = {
+    // Create a CompletableFuture
+    val completableFuture: CompletableFuture[T] = new CompletableFuture[T]
+    // Bind
+    addTaskListener(task, completableFuture.complete, completableFuture.completeExceptionally)
+    // Return the CompletionStage
+    completableFuture
+  }
+
+  /**
+   * The method addTaskListener adds a `PromiseListener[T]` to a ParSeq `Task[T]` for binding success and failure to
+   * the corresponding handlers.
+   *
+   * @param task The ParSeq Task
+   * @param success The success handler
+   * @param failure The failure handler
+   * @tparam T The type parameter of the ParSeq Task
+   */
+  private def addTaskListener[T](task: Task[T], success: T => Any, failure: Throwable => Any): Unit = {
+    task.addListener(new PromiseListener[T] {
+      override def onResolved(parSeqPromise: ParSeqPromise[T]): Unit = {
+        if (parSeqPromise.isFailed) failure(parSeqPromise.getError)
+        else success(parSeqPromise.get)
+      }
+    })
+  }
+
 }

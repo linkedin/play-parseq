@@ -37,7 +37,8 @@ public class SingleTaskSampleTest extends WithApplication {
     Result result = route(routes.SingleTaskSample.demo());
     // Assert the status and the content
     assertEquals(OK, result.status());
-    assertEquals("text/plain", result.contentType());
+    assertEquals("text/plain", result.contentType().orElse(""));
     assertTrue(contentAsString(result).equals("Hello World"));
   }
+
 }

@@ -46,13 +46,16 @@ public class ParSeqTraceSensorImpl implements ParSeqTraceSensor {
    */
   @Inject
   public ParSeqTraceSensorImpl(final Environment environment) {
-    this._environment = environment;
+    _environment = environment;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isEnabled(final Http.Context context, final ParSeqTaskStore parSeqTaskStore) {
-    return _environment.isDev() &&
-        Optional.ofNullable(context.request().getQueryString(QUERY_KEY)).map(s -> s.equals("true")).orElse(false) &&
-        parSeqTaskStore.get(context).size() > 0;
+    return _environment.isDev() && Optional.ofNullable(context.request().getQueryString(QUERY_KEY))
+        .map(s -> s.equals("true")).orElse(false) && parSeqTaskStore.get(context).size() > 0;
   }
+
 }

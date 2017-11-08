@@ -13,11 +13,10 @@ package com.linkedin.playparseq.utils
 
 import com.linkedin.parseq.{Engine, EngineBuilder}
 import javax.inject.{Inject, Provider, Singleton}
-import java.util.concurrent.{Executors, ExecutorService, ScheduledExecutorService, TimeUnit}
+import java.util.concurrent.{ExecutorService, Executors, ScheduledExecutorService, TimeUnit}
 import play.api.Configuration
 import play.api.inject.ApplicationLifecycle
-import play.api.libs.concurrent.Execution.Implicits._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
@@ -28,11 +27,12 @@ import scala.concurrent.Future
  *
  * @param applicationLifecycle The injected ApplicationLifecycle component
  * @param configuration The injected Configuration component
+ * @param executionContext The injected [[ExecutionContext]] component
  * @see <a href="https://github.com/linkedin/parseq/wiki/User's-Guide#creating-an-engine">ParSeq Wiki</a>
  * @author Yinan Ding (yding@linkedin.com)
  */
 @Singleton
-class EngineProvider @Inject()(applicationLifecycle: ApplicationLifecycle, configuration: Configuration) extends Provider[Engine] {
+class EngineProvider @Inject()(applicationLifecycle: ApplicationLifecycle, configuration: Configuration)(implicit executionContext: ExecutionContext) extends Provider[Engine] {
 
   /**
    * The field taskScheduler is a task scheduler for ParSeq Engine.
@@ -50,7 +50,7 @@ class EngineProvider @Inject()(applicationLifecycle: ApplicationLifecycle, confi
   private[this] val engine: Engine = new EngineBuilder().setTaskExecutor(taskScheduler).setTimerScheduler(timerScheduler).build
 
   // Setup
-  applicationLifecycle.addStopHook(() => Future{
+  applicationLifecycle.addStopHook(() => Future {
     // Tear down the ParSeq Engine
     engine.shutdown()
     engine.awaitTermination(getTerminationWaitSeconds, TimeUnit.SECONDS)
@@ -71,8 +71,7 @@ class EngineProvider @Inject()(applicationLifecycle: ApplicationLifecycle, confi
    *
    * @return The number of threads
    */
-  private[this] def getNumThreads: Int = configuration.getInt("parseq.engine.numThreads")
-    .getOrElse(Runtime.getRuntime.availableProcessors + 1)
+  private[this] def getNumThreads: Int = configuration.getInt("parseq.engine.numThreads").getOrElse(Runtime.getRuntime.availableProcessors + 1)
 
   /**
    * The method getTerminationWaitSeconds gets the maximum time to wait for Engine's termination in the unit of seconds.
@@ -80,6 +79,6 @@ class EngineProvider @Inject()(applicationLifecycle: ApplicationLifecycle, confi
    *
    * @return The time to wait in seconds
    */
-  private[this] def getTerminationWaitSeconds: Int = configuration.getInt("parseq.engine.terminationWaitSeconds")
-    .getOrElse(1)
+  private[this] def getTerminationWaitSeconds: Int = configuration.getInt("parseq.engine.terminationWaitSeconds").getOrElse(1)
+
 }

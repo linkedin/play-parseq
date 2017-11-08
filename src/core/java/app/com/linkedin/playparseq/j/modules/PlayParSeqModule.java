@@ -17,7 +17,6 @@ import com.linkedin.playparseq.j.PlayParSeqImpl;
 import com.linkedin.playparseq.j.stores.ParSeqTaskStore;
 import com.linkedin.playparseq.j.stores.ParSeqTaskStoreImpl;
 import com.linkedin.playparseq.utils.EngineProvider;
-import com.linkedin.playparseq.utils.PlayParSeqHelper;
 import play.api.Configuration;
 import play.api.Environment;
 import play.api.inject.Binding;
@@ -27,8 +26,8 @@ import scala.collection.Seq;
 
 /**
  * The class PlayParSeqModule is a preset Module for the dependency injection bindings of {@link PlayParSeq}.
- * This {@link PlayParSeq} configuration includes {@link PlayParSeqImpl}, {@link ParSeqTaskStoreImpl},
- * {@link EngineProvider} and {@link PlayParSeqHelper}.
+ * This {@link PlayParSeq} configuration includes {@link PlayParSeqImpl}, {@link ParSeqTaskStoreImpl} and
+ * {@link EngineProvider}.
  * The key `play.modules.enabled += "com.linkedin.playparseq.j.modules.PlayParSeqModule"` needs to be added into your
  * conf file, if you want to use this {@link PlayParSeq} configuration.
  *
@@ -50,4 +49,5 @@ public class PlayParSeqModule extends Module {
         bind(ParSeqTaskStore.class).to(ParSeqTaskStoreImpl.class),
         bind(Engine.class).toProvider(EngineProvider.class));
   }
+
 }

@@ -12,24 +12,25 @@
 package com.linkedin.playparseq.trace.j.renderers;
 
 import com.linkedin.playparseq.j.stores.ParSeqTaskStore;
-import play.libs.F;
+import java.util.concurrent.CompletionStage;
 import play.mvc.Http;
 import play.mvc.Result;
 
 
 /**
- * The interface ParSeqTraceRenderer defines rendering a {@code F.Promise<Result>} from {@link ParSeqTaskStore}.
+ * The interface ParSeqTraceRenderer defines rendering a {@code CompletionStage<Result>} from {@link ParSeqTaskStore}.
  *
  * @author Yinan Ding (yding@linkedin.com)
  */
 public interface ParSeqTraceRenderer {
 
   /**
-   * The method render generates a {@code F.Promise<Result>} from {@link ParSeqTaskStore}.
+   * The method render generates a {@code CompletionStage<Result>} from {@link ParSeqTaskStore}.
    *
    * @param context The HTTP Context
    * @param parSeqTaskStore The {@link ParSeqTaskStore} for getting ParSeq Tasks
-   * @return The Play Promise of Result
+   * @return The CompletionStage of Result
    */
-  F.Promise<Result> render(final Http.Context context, final ParSeqTaskStore parSeqTaskStore);
+  CompletionStage<Result> render(final Http.Context context, final ParSeqTaskStore parSeqTaskStore);
+
 }

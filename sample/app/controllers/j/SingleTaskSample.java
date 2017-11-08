@@ -14,8 +14,9 @@ package controllers.j;
 import com.linkedin.parseq.Task;
 import com.linkedin.playparseq.j.PlayParSeq;
 import com.linkedin.playparseq.trace.j.ParSeqTraceAction;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
-import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -42,7 +43,7 @@ public class SingleTaskSample extends Controller {
    */
   @Inject
   public SingleTaskSample(final PlayParSeq playParSeq) {
-    this._playParSeq = playParSeq;
+    _playParSeq = playParSeq;
   }
 
   /**
@@ -50,17 +51,18 @@ public class SingleTaskSample extends Controller {
    * Note that, in general you shouldn't be running multiple ParSeq Tasks, otherwise the order of execution is not
    * accurate, which minimizes the benefits of ParSeq.
    *
-   * @return The Promise of Action Result
+   * @return The CompletionStage of Action Result
    */
   @With(ParSeqTraceAction.class)
-  public F.Promise<Result> demo() {
+  public CompletionStage<Result> demo() {
     // Run the Task
     return _playParSeq.runTask(Http.Context.current(),
         // In parallel
         Task.par(
             // Convert to ParSeq Task
-            _playParSeq.toTask("hello", () -> F.Promise.promise(() -> "Hello")),
+            _playParSeq.toTask("hello", () -> CompletableFuture.supplyAsync(() -> "Hello")),
             // Simple ParSeq Task
             Task.value("world", "World")).map((h, w) -> ok(h + " " + w)));
   }
+
 }

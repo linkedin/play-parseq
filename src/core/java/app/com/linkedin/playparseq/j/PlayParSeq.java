@@ -13,14 +13,14 @@ package com.linkedin.playparseq.j;
 
 import com.linkedin.parseq.Task;
 import java.util.concurrent.Callable;
-import play.libs.F;
+import java.util.concurrent.CompletionStage;
 import play.mvc.Http;
 
 
 /**
- * The interface PlayParSeq defines the conversions from a {@code Callable<F.Promise<T>>} to a ParSeq {@code Task<T>},
- * and also the execution of a ParSeq {@code Task<T>} which returns a Play {@code F.Promise<T>}, in the mean time
- * putting Tasks into store.
+ * The interface PlayParSeq defines the conversions from a {@code Callable<CompletionStage<T>>} to a ParSeq
+ * {@code Task<T>}, and also the execution of a ParSeq {@code Task<T>} which returns a {@code CompletionStage<T>}, in
+ * the mean time putting Tasks into store.
  * Note that, in general you shouldn't be running multiple ParSeq Tasks, otherwise the order of execution may not be
  * accurate, which minimizes the benefits of ParSeq.
  *
@@ -29,45 +29,34 @@ import play.mvc.Http;
 public interface PlayParSeq {
 
   /**
-   * The method toTask converts a {@code Callable<F.Promise<T>>} to a ParSeq {@code Task<T>}.
+   * The method toTask converts a {@code Callable<CompletionStage<T>>} to a ParSeq {@code Task<T>}.
    *
    * @param name The String which describes the Task and shows up in a trace
-   * @param f The Callable which returns a Play Promise
-   * @param <T> The type parameter of the Play Promise and the ParSeq Task
+   * @param f The Callable which returns a CompletionStage
+   * @param <T> The type parameter of the CompletionStage and the ParSeq Task
    * @return The ParSeq Task
    */
-  <T> Task<T> toTask(final String name, final Callable<F.Promise<T>> f);
+  <T> Task<T> toTask(final String name, final Callable<CompletionStage<T>> f);
 
   /**
-   * The method toTask converts a {@code Callable<F.Promise<T>>} to a ParSeq {@code Task<T>}, which binds with a default
-   * name.
+   * The method toTask converts a {@code Callable<CompletionStage<T>>} to a ParSeq {@code Task<T>}, which binds with a
+   * default name.
    *
-   * @param f The Callable which returns a Play Promise
-   * @param <T> The type parameter of the Play Promise and the ParSeq Task
+   * @param f The Callable which returns a CompletionStage
+   * @param <T> The type parameter of the CompletionStage and the ParSeq Task
    * @return The ParSeq Task
    */
-  <T> Task<T> toTask(final Callable<F.Promise<T>> f);
+  <T> Task<T> toTask(final Callable<CompletionStage<T>> f);
 
   /**
-   * The method runTask executes a ParSeq {@code Task<T>} then generates a Play {@code F.Promise<T>}, and puts into the
+   * The method runTask executes a ParSeq {@code Task<T>} then generates a {@code CompletionStage<T>}, and puts into the
    * store.
    *
    * @param context The HTTP Context
    * @param task The ParSeq Task
-   * @param <T> The type parameter of the ParSeq Task and the Play Promise
-   * @return The Play Promise
+   * @param <T> The type parameter of the ParSeq Task and the CompletionStage
+   * @return The CompletionStage
    */
-  <T> F.Promise<T> runTask(final Http.Context context, final Task<T> task);
+  <T> CompletionStage<T> runTask(final Http.Context context, final Task<T> task);
 
-  /**
-   * The method runTask executes a ParSeq {@code Task<T>} then generates a Play {@code F.Promise<T>}, and puts into the
-   * store.
-   *
-   * @param task The ParSeq Task
-   * @param <T> The type parameter of the ParSeq Task and the Play Promise
-   * @return The Play Promise
-   * @deprecated Use the version with explicit Http.Context.
-   */
-  @Deprecated
-  <T> F.Promise<T> runTask(final Task<T> task);
 }

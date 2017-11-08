@@ -11,15 +11,15 @@
  */
 package com.linkedin.playparseq.trace.s
 
+import akka.stream.Materializer
 import com.linkedin.playparseq.s.stores.{ContextRequest, ParSeqTaskStore}
 import com.linkedin.playparseq.trace.s.renderers.ParSeqTraceRenderer
 import com.linkedin.playparseq.trace.s.sensors.ParSeqTraceSensor
-import com.linkedin.playparseq.trace.utils.ParSeqTraceHelper
-import javax.inject.Inject
-import play.api.libs.concurrent.Execution.Implicits._
+import com.linkedin.playparseq.trace.utils.PlayParSeqTraceHelper
+import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import scala.collection.concurrent.TrieMap
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 /**
@@ -42,25 +42,33 @@ trait ParSeqTraceBuilder {
    * @return The Future of Result
    */
   def build(origin: Future[Result], parSeqTaskStore: ParSeqTaskStore, parSeqTraceSensor: ParSeqTraceSensor, parSeqTraceRenderer: ParSeqTraceRenderer)(implicit requestHeader: RequestHeader): Future[Result]
+
 }
 
 /**
  * The class ParSeqTraceBuilderImpl is an implementation of [[ParSeqTraceBuilder]] with the help from the class
- * [[ParSeqTraceHelper]].
+ * [[PlayParSeqTraceHelper]].
  *
+ * @param materializer The injected [[Materializer]] component
+ * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
-class ParSeqTraceBuilderImpl extends ParSeqTraceHelper with ParSeqTraceBuilder {
+@Singleton
+class ParSeqTraceBuilderImpl @Inject()(implicit materializer: Materializer, executionContext: ExecutionContext) extends PlayParSeqTraceHelper with ParSeqTraceBuilder {
 
+  /**
+   * @inheritdoc
+   */
   override def build(origin: Future[Result], parSeqTaskStore: ParSeqTaskStore, parSeqTraceSensor: ParSeqTraceSensor, parSeqTraceRenderer: ParSeqTraceRenderer)(implicit requestHeader: RequestHeader): Future[Result] = {
     // Sense
     if (parSeqTraceSensor.isEnabled(parSeqTaskStore)) {
       // Consume the origin and bind independent Tasks
-      val futures: Set[Future[Any]] = Set(origin.flatMap(r => consumeResult(r))) ++ parSeqTaskStore.get.map(bindTaskToFuture(_))
+      val futures: Set[Future[Any]] = Set(origin.flatMap(consumeResult)) ++ parSeqTaskStore.get.map(bindTaskToFuture(_))
       // Render
-      Future.sequence(futures).flatMap(list => parSeqTraceRenderer.render(parSeqTaskStore))
+      Future.sequence(futures).flatMap(_ => parSeqTraceRenderer.render(parSeqTaskStore))
     } else origin
   }
+
 }
 
 /**
@@ -92,4 +100,5 @@ class ParSeqTraceAction @Inject()(parSeqTaskStore: ParSeqTaskStore, parSeqTraceB
     // Compose
     parSeqTraceBuilder.build(block(contextRequest), parSeqTaskStore, parSeqTraceSensor, parSeqTraceRenderer)
   }
+
 }

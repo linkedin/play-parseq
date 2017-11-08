@@ -13,6 +13,7 @@ package controllers
 
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 
+
 /**
  * The class ApplicationSpec is a specification class for [[Application]].
  *
@@ -21,13 +22,13 @@ import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 class ApplicationSpec extends PlaySpecification {
 
   "The Application" should {
-
     "respond to GET index" in new WithApplication {
-      val result = route(FakeRequest(GET, routes.Application.index().url)).get
+      val result = route(app, FakeRequest(GET, routes.Application.index().url)).get
       // Assert the status and the content
       status(result) must equalTo(OK)
       contentType(result) must beSome("text/html")
       contentAsString(result) must contain("Sample")
     }
   }
+
 }

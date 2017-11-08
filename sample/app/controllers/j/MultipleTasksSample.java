@@ -15,8 +15,8 @@ import com.linkedin.parseq.Task;
 import com.linkedin.parseq.httpclient.HttpClient;
 import com.linkedin.playparseq.j.PlayParSeq;
 import com.linkedin.playparseq.trace.j.ParSeqTraceAction;
+import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
-import play.libs.F;
 import play.libs.ws.WSClient;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -45,13 +45,13 @@ public class MultipleTasksSample extends Controller {
   /**
    * The constructor injects the WSClient and the {@link PlayParSeq}.
    *
-   * @param ws The injected WSClient component
+   * @param ws The injected {@link WSClient} component
    * @param playParSeq The injected {@link PlayParSeq} component
    */
   @Inject
   public MultipleTasksSample(final WSClient ws, final PlayParSeq playParSeq) {
-    this._ws = ws;
-    this._playParSeq = playParSeq;
+    _ws = ws;
+    _playParSeq = playParSeq;
   }
 
   /**
@@ -60,10 +60,10 @@ public class MultipleTasksSample extends Controller {
    * Note that, in general you shouldn't be running multiple ParSeq Tasks, otherwise the order of execution might not be
    * accurate, which minimizes the benefits of ParSeq.
    *
-   * @return The Promise of Action Result
+   * @return The CompletionStage of Action Result
    */
   @With(ParSeqTraceAction.class)
-  public F.Promise<Result> demo() {
+  public CompletionStage<Result> demo() {
     Http.Context context = Http.Context.current();
     // Run an independent Task
     _playParSeq.runTask(context, getLengthTask("http://www.yahoo.com"));
@@ -72,20 +72,20 @@ public class MultipleTasksSample extends Controller {
         // In parallel
         Task.par(
             // Convert to ParSeq Task
-            _playParSeq.toTask("http://www.bing.com", () -> getLengthPromise("http://www.bing.com")),
+            _playParSeq.toTask("http://www.bing.com", () -> getLengthCompletionStage("http://www.bing.com")),
             // Complex ParSeq Task
             getLengthTask("http://www.google.com")
         ).map((g, b) -> ok(String.valueOf(g + b))));
   }
 
   /**
-   * The method getLengthPromise creates an F.Promise for getting the length of an HTTP request body.
+   * The method getLengthCompletionStage creates a CompletionStage for getting the length of an HTTP request body.
    *
    * @param url The URL
-   * @return The Play Promise
+   * @return The CompletionStage
    */
-  private F.Promise<Integer> getLengthPromise(final String url) {
-    return _ws.url(url).get().map(r -> r.getBody().length());
+  private CompletionStage<Integer> getLengthCompletionStage(final String url) {
+    return _ws.url(url).get().thenApplyAsync(r -> r.getBody().length());
   }
 
   /**
@@ -97,4 +97,5 @@ public class MultipleTasksSample extends Controller {
   private Task<Integer> getLengthTask(final String url) {
     return HttpClient.get(url).task().map(url, r -> r.getResponseBody().length());
   }
+
 }

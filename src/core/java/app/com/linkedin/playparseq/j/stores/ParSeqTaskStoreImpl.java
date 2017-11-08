@@ -35,12 +35,18 @@ public class ParSeqTaskStoreImpl implements ParSeqTaskStore {
    */
   public final static String ARGUMENTS_KEY = "ParSeqTasks";
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void put(final Http.Context context, final Task<?> task) {
-    this.get(context).add(task);
+    get(context).add(task);
   }
 
-  @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})
+  /**
+   * {@inheritDoc}
+   */
+  @SuppressWarnings("unchecked")
   @Override
   public Set<Task<?>> get(final Http.Context context) {
     Map<String, Object> args = context.args;
@@ -52,4 +58,5 @@ public class ParSeqTaskStoreImpl implements ParSeqTaskStore {
       });
     }
   }
+
 }
