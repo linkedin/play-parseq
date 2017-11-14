@@ -17,10 +17,9 @@ import com.linkedin.playparseq.s.stores.ParSeqTaskStore
 import com.linkedin.playparseq.trace.s.sensors.ParSeqTraceSensor
 import com.linkedin.playparseq.trace.s.renderers.ParSeqTraceRenderer
 import org.specs2.mock.Mockito
-import play.api.libs.concurrent.Execution
 import play.api.mvc.{RequestHeader, Result, Results}
 import play.api.test.PlaySpecification
-import scala.collection.mutable
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
 
@@ -36,7 +35,7 @@ class ParSeqTraceBuilderImplSpec extends PlaySpecification with Mockito {
       val render: String = "render"
       // Mock ParSeqTaskStore
       val mockStore: ParSeqTaskStore = mock[ParSeqTaskStore]
-      mockStore.get(any) returns mutable.Set.empty
+      mockStore.get(any) returns Set.empty
       // Mock ParSeqTraceSensor
       val mockTraceSensor: ParSeqTraceSensor = mock[ParSeqTraceSensor]
       mockTraceSensor.isEnabled(any)(any) returns true
@@ -47,7 +46,7 @@ class ParSeqTraceBuilderImplSpec extends PlaySpecification with Mockito {
       val mockMaterializer: Materializer = mock[Materializer]
       mockMaterializer.materialize[Future[Done]](any) returns Future.successful(Done)
       // Build ParSeq Trace
-      val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl()(mockMaterializer, Execution.defaultContext)
+      val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl()(mockMaterializer, ExecutionContext.global)
       val result: Future[Result] = playParSeqTraceImpl.build(Future.successful(Results.NotFound("origin")), mockStore, mockTraceSensor, mockTraceRenderer)(mock[RequestHeader])
       // Assert the status and the content
       status(result) must equalTo(OK)
@@ -61,7 +60,7 @@ class ParSeqTraceBuilderImplSpec extends PlaySpecification with Mockito {
       val origin: String = "origin"
       // Mock ParSeqTaskStore
       val mockStore: ParSeqTaskStore = mock[ParSeqTaskStore]
-      mockStore.get(any) returns mutable.Set.empty
+      mockStore.get(any) returns Set.empty
       // Mock ParSeqTraceSensor
       val mockTraceSensor: ParSeqTraceSensor = mock[ParSeqTraceSensor]
       mockTraceSensor.isEnabled(any)(any) returns false
@@ -72,7 +71,7 @@ class ParSeqTraceBuilderImplSpec extends PlaySpecification with Mockito {
       val mockMaterializier: Materializer = mock[Materializer]
       mockMaterializier.materialize[Future[Done]](any) returns Future.successful(Done)
       // Build ParSeq Trace
-      val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl()(mockMaterializier, Execution.defaultContext)
+      val playParSeqTraceImpl: ParSeqTraceBuilderImpl = new ParSeqTraceBuilderImpl()(mockMaterializier, ExecutionContext.global)
       val result: Future[Result] = playParSeqTraceImpl.build(Future.successful(Results.NotFound("origin")), mockStore, mockTraceSensor, mockTraceRenderer)(mock[RequestHeader])
       // Assert the status and the content
       status(result) must equalTo(NOT_FOUND)

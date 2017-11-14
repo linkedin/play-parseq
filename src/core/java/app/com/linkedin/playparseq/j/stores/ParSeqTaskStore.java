@@ -18,8 +18,9 @@ import play.mvc.Http;
 
 /**
  * The interface ParSeqTaskStore defines putting ParSeq Task into store and getting Tasks out of store.
- * During a request, the ParSeqTaskStore will store all ParSeq Tasks when they run. The ParSeqTaskStore will retrieve
- * all the Tasks only when it needs to generate the ParSeq Trace of the current request.
+ * During a request, all ParSeq Tasks will be stored in the ParSeqTaskStore when they run, and will be retrieved when it
+ * needs to generate the ParSeq Trace of the current request. The put/get APIs can only be properly used after the API
+ * initialize is called for setting up the store.
  *
  * @author Yinan Ding (yding@linkedin.com)
  */
@@ -34,11 +35,19 @@ public interface ParSeqTaskStore {
   void put(final Http.Context context, final Task<?> task);
 
   /**
-   * The method get gets all Tasks from one request out of store as a Set.
+   * The method get gets all Tasks from one request out of store as an unmodifiable Set.
    *
    * @param context The HTTP Context
    * @return A set of Tasks
    */
   Set<Task<?>> get(final Http.Context context);
+
+  /**
+   * The method initialize sets up the store properly for put/get APIs.
+   *
+   * @param context The origin HTTP Context
+   * @return The HTTP Context with store set up properly
+   */
+  Http.Context initialize(final Http.Context context);
 
 }

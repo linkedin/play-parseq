@@ -15,16 +15,17 @@ import com.linkedin.parseq.Task
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Singleton
-import play.api.mvc.{Request, RequestHeader, WrappedRequest}
+import play.api.libs.typedmap.TypedKey
+import play.api.mvc.{Request, RequestHeader}
 import scala.collection.JavaConverters._
-import scala.collection.concurrent.TrieMap
-import scala.collection.mutable
+import scala.collection.mutable.{Set => MutableSet}
 
 
 /**
  * The trait ParSeqTaskStore defines putting ParSeq Task into store and getting all Tasks out of store.
- * During a request, the ParSeqTaskStore will store all ParSeq Tasks when they run. The ParSeqTaskStore will retrieve
- * all the Tasks only when it needs to generate the ParSeq Trace of the current request.
+ * During a request, all ParSeq Tasks will be stored in the ParSeqTaskStore when they run, and will be retrieved when it
+ * needs to generate the ParSeq Trace of the current request. The put/get APIs can only be properly used after the API
+ * initialize is called for setting up the store.
  *
  * @author Yinan Ding (yding@linkedin.com)
  */
@@ -34,25 +35,34 @@ trait ParSeqTaskStore {
    * The method put puts ParSeq Task into store.
    *
    * @param task The ParSeq Task
-   * @param requestHeader The request
+   * @param requestHeader The Request
    */
   def put(task: Task[_])(implicit requestHeader: RequestHeader)
 
   /**
-   * The method get gets all Tasks from one request out of store as a Set.
+   * The method get gets all Tasks from one request out of store as an immutable Set.
    *
-   * @param requestHeader The request
-   * @return A set of Tasks
+   * @param requestHeader The Request
+   * @return A Set of Tasks
    */
-  def get(implicit requestHeader: RequestHeader): mutable.Set[Task[_]]
+  def get(implicit requestHeader: RequestHeader): Set[Task[_]]
+
+  /**
+   * The method initialize sets up the store properly for put/get APIs.
+   *
+   * @param request The origin Request
+   * @tparam T The type parameter of the Request
+   * @return The Request with store set up properly
+   */
+  def initialize[T](request: Request[T]): Request[T]
 
 }
 
 /**
  * The class ParSeqTaskStoreImpl is an implementation of the trait [[ParSeqTaskStore]], whose store exists inside the
- * [[ContextRequest]].
- * However, the [[ContextRequest]] is only used when you use the ParSeqTraceAction for the ParSeq Trace feature. The
- * store will still work correctly without [[ContextRequest]] when not using ParSeqTraceAction, but act like dummy.
+ * attribute of the request.
+ * However, the attribute is only initialized when you use the ParSeqTraceAction for the ParSeq Trace feature. The
+ * store will still work correctly without ParSeqTraceAction when not using ParSeqTraceAction, but act like dummy.
  *
  * @author Yinan Ding (yding@linkedin.com)
  */
@@ -62,41 +72,29 @@ class ParSeqTaskStoreImpl extends ParSeqTaskStore {
   /**
    * The field ArgumentsKey is the default key of ParSeq Tasks.
    */
-  val ArgumentsKey = "ParSeqTasks"
+  val ArgumentsKey: TypedKey[MutableSet[Task[_]]] = TypedKey("ParSeqTasks")
 
   /**
    * @inheritdoc
    */
-  override def put(task: Task[_])(implicit requestHeader: RequestHeader): Unit = {
-    requestHeader match {
-      case _: ContextRequest[_] => get.add(task)
-      case _ =>
-    }
-  }
+  override def put(task: Task[_])(implicit requestHeader: RequestHeader): Unit = getOption.map(_.add(task))
 
   /**
    * @inheritdoc
    */
-  override def get(implicit requestHeader: RequestHeader): mutable.Set[Task[_]] = {
-    requestHeader match {
-      case ctx: ContextRequest[_] => ctx.args.get(ArgumentsKey).map(_.asInstanceOf[mutable.Set[Task[_]]])
-        .getOrElse({
-        val tasks: mutable.Set[Task[_]] = Collections.newSetFromMap[Task[_]](new ConcurrentHashMap).asScala
-        ctx.args.putIfAbsent(ArgumentsKey, tasks).getOrElse(tasks).asInstanceOf[mutable.Set[Task[_]]]
-      })
-      case _ => mutable.Set.empty
-    }
-  }
+  override def get(implicit requestHeader: RequestHeader): Set[Task[_]] = getOption.map(_.toSet).getOrElse(Set.empty)
+
+  /**
+   * @inheritdoc
+   */
+  override def initialize[T](request: Request[T]): Request[T] = request.addAttr(ArgumentsKey, Collections.newSetFromMap[Task[_]](new ConcurrentHashMap).asScala)
+
+  /**
+   * The method getOption gets the optional mutable Set of Tasks from one request out of store for modifications.
+   *
+   * @param requestHeader The Request
+   * @return A Set of Tasks
+   */
+  private[this] def getOption(implicit requestHeader: RequestHeader) = requestHeader.attrs.get(ArgumentsKey)
 
 }
-
-/**
- * The class ContextRequest is a WrappedRequest which wraps a request with an arguments TrieMap for storing data within
- * the scope of request.
- *
- * @param args The arguments TrieMap for storing data
- * @param request The origin request
- * @tparam T The type parameter of the Request
- * @author Yinan Ding (yding@linkedin.com)
- */
-class ContextRequest[T](val args: TrieMap[String, Any], request: Request[T]) extends WrappedRequest[T](request)

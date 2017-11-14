@@ -17,10 +17,10 @@ import com.linkedin.playparseq.s.stores.ParSeqTaskStore
 import java.util.concurrent.{Executors, ExecutorService, ScheduledExecutorService, TimeUnit}
 import org.specs2.mock.Mockito
 import org.specs2.specification.BeforeAfterEach
-import play.api.libs.concurrent.Execution
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.RequestHeader
 import play.api.test.PlaySpecification
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 
@@ -65,7 +65,7 @@ class PlayParSeqImplSpec extends PlaySpecification with BeforeAfterEach with Moc
     taskScheduler = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors + 1)
     timerScheduler = Executors.newSingleThreadScheduledExecutor
     engine = new EngineBuilder().setTaskExecutor(taskScheduler).setTimerScheduler(timerScheduler).build
-    playParSeqImpl = new PlayParSeqImpl(engine, mock[ParSeqTaskStore])(Execution.defaultContext)
+    playParSeqImpl = new PlayParSeqImpl(engine, mock[ParSeqTaskStore])(ExecutionContext.global)
   }
 
   /**

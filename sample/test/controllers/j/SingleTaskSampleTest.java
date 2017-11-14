@@ -34,7 +34,7 @@ public class SingleTaskSampleTest extends WithApplication {
    */
   @Test
   public void canGetDemo() {
-    Result result = route(routes.SingleTaskSample.demo());
+    Result result = route(app, routes.SingleTaskSample.demo());
     // Assert the status and the content
     assertEquals(OK, result.status());
     assertEquals("text/plain", result.contentType().orElse(""));

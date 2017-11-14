@@ -6,4 +6,5 @@
 GET         /tracevis/*file        com.linkedin.playparseq.trace.controllers.ParSeqTraceViewer.at(file)
 
 # Graphviz generation
++ nocsrf
 POST        /tracevis/dot          com.linkedin.playparseq.trace.controllers.ParSeqTraceViewer.dot

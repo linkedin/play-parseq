@@ -49,7 +49,7 @@ public class CoreOnlySampleTest extends WithApplication {
    */
   @Test
   public void canGetInput() {
-    Result result = route(routes.CoreOnlySample.input());
+    Result result = route(app, routes.CoreOnlySample.input());
     // Assert the status and the content
     assertEquals(OK, result.status());
     assertEquals("text/html", result.contentType().orElse(""));
@@ -61,7 +61,7 @@ public class CoreOnlySampleTest extends WithApplication {
    */
   @Test
   public void canGetDemo() {
-    Result result = route(routes.CoreOnlySample.demo(TEST_TEXT, TEST_START));
+    Result result = route(app, routes.CoreOnlySample.demo(TEST_TEXT, TEST_START));
     // Assert the status and the content
     assertEquals(OK, result.status());
     assertEquals("text/plain", result.contentType().orElse(""));
@@ -73,7 +73,7 @@ public class CoreOnlySampleTest extends WithApplication {
    */
   @Test
   public void canGetDemoWithFailure() {
-    Result result = route(routes.CoreOnlySample.demo(TEST_TEXT, TEST_START_FAIL));
+    Result result = route(app, routes.CoreOnlySample.demo(TEST_TEXT, TEST_START_FAIL));
     // Assert the status and the content
     assertEquals(OK, result.status());
     assertEquals("text/plain", result.contentType().orElse(""));

@@ -22,8 +22,11 @@ import play.mvc.Result;
 
 
 /**
- * The class ParSeqTraceAction is an Action which composes with {@link ParSeqTraceBuilder} to hand origin Result off in
- * order to determine whether to show ParSeq Trace data or the origin Result, if so generate the ParSeq Trace Result.
+ * The class ParSeqTraceAction is an Action composition which sets up a normal HTTP Context with {@link ParSeqTaskStore}
+ * in order to put ParSeq Task into store for retrieving all Tasks within the scope of one request when building ParSeq
+ * Trace.
+ * And it also composes with {@link ParSeqTraceBuilder} to hand origin Result off in order to determine whether to show
+ * ParSeq Trace data or the origin Result, if so generate the ParSeq Trace Result.
  *
  * @author Yinan Ding (yding@linkedin.com)
  */
@@ -69,14 +72,16 @@ public class ParSeqTraceAction extends Simple {
   }
 
   /**
-   * The method call composes with {@link ParSeqTraceBuilder} to build ParSeq Trace for the request.
+   * The method call sets up a normal HTTP Context with {@link ParSeqTaskStore} and composes with
+   * {@link ParSeqTraceBuilder} to build ParSeq Trace for the request.
    *
    * @param context The HTTP Context
    * @return The CompletionStage of Result
    */
   @Override
   public CompletionStage<Result> call(final Http.Context context) {
-    return _parSeqTraceBuilder.build(context, delegate.call(context), _parSeqTaskStore, _parSeqTraceSensor,
+    Http.Context newContext = _parSeqTaskStore.initialize(context);
+    return _parSeqTraceBuilder.build(newContext, delegate.call(newContext), _parSeqTaskStore, _parSeqTraceSensor,
         _parSeqTraceRenderer);
   }
 

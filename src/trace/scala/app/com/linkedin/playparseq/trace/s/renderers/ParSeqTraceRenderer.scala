@@ -19,7 +19,6 @@ import play.api.Environment
 import play.api.http.HttpConfiguration
 import play.api.mvc.{RequestHeader, Result, Results}
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -59,7 +58,7 @@ class ParSeqTraceRendererImpl @Inject()(environment: Environment, httpConfigurat
    */
   override def render(parSeqTaskStore: ParSeqTaskStore)(implicit requestHeader: RequestHeader): Future[Result] =
     Future {
-      val traces: mutable.Set[Trace] = parSeqTaskStore.get.map(_.getTrace)
+      val traces: Set[Trace] = parSeqTaskStore.get.map(_.getTrace)
       val traceMap: Map[java.lang.Long, ShallowTrace] = traces.foldLeft(Map[java.lang.Long, ShallowTrace]())(_ ++ _.getTraceMap.asScala)
       val relationships: Set[TraceRelationship] = traces.foldLeft(Set[TraceRelationship]())(_ ++ _.getRelationships.asScala)
       // Generate Result of ParSeq Trace

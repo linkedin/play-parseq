@@ -12,13 +12,12 @@
 package com.linkedin.playparseq.trace.s
 
 import akka.stream.Materializer
-import com.linkedin.playparseq.s.stores.{ContextRequest, ParSeqTaskStore}
+import com.linkedin.playparseq.s.stores.ParSeqTaskStore
 import com.linkedin.playparseq.trace.s.renderers.ParSeqTraceRenderer
 import com.linkedin.playparseq.trace.s.sensors.ParSeqTraceSensor
 import com.linkedin.playparseq.trace.utils.PlayParSeqTraceHelper
 import javax.inject.{Inject, Singleton}
 import play.api.mvc._
-import scala.collection.concurrent.TrieMap
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -72,7 +71,7 @@ class ParSeqTraceBuilderImpl @Inject()(implicit materializer: Materializer, exec
 }
 
 /**
- * The class ParSeqTraceAction is an ActionFunction which transforms a normal Request to a [[ContextRequest]] in order
+ * The class ParSeqTraceAction is an Action composition which sets up a normal Request with [[ParSeqTaskStore]] in order
  * to put ParSeq Task into store for retrieving all Tasks within the scope of one request when building ParSeq Trace.
  * And it also composes with [[ParSeqTraceBuilder]] to hand origin Result off in order to determine whether to show
  * ParSeq Trace data or the origin Result, if so generate the ParSeq Trace Result.
@@ -81,24 +80,26 @@ class ParSeqTraceBuilderImpl @Inject()(implicit materializer: Materializer, exec
  * @param parSeqTraceBuilder The injected [[ParSeqTraceBuilder]] component
  * @param parSeqTraceSensor The injected [[ParSeqTraceSensor]] component
  * @param parSeqTraceRenderer The injected [[ParSeqTraceRenderer]] component
+ * @param parser The injected [[BodyParser]] component
+ * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
-class ParSeqTraceAction @Inject()(parSeqTaskStore: ParSeqTaskStore, parSeqTraceBuilder: ParSeqTraceBuilder, parSeqTraceSensor: ParSeqTraceSensor, parSeqTraceRenderer: ParSeqTraceRenderer) extends ActionBuilder[ContextRequest] with ActionFunction[Request, ContextRequest] {
+class ParSeqTraceAction @Inject()(parSeqTaskStore: ParSeqTaskStore, parSeqTraceBuilder: ParSeqTraceBuilder, parSeqTraceSensor: ParSeqTraceSensor, parSeqTraceRenderer: ParSeqTraceRenderer, parser: BodyParsers.Default)(implicit executionContext: ExecutionContext) extends ActionBuilderImpl(parser) {
 
   /**
-   * The method invokeBlock transforms a normal Request to a [[ContextRequest]] and composes with
-   * [[ParSeqTraceBuilder]] to build ParSeq Trace for the Request.
+   * The method invokeBlock sets up a normal Request with [[ParSeqTaskStore]] and composes with [[ParSeqTraceBuilder]]
+   * to build ParSeq Trace for the Request.
    *
    * @param request The origin Request
    * @param block The block of origin Request process
    * @tparam A The type parameter of the Request
    * @return The Future of Result
    */
-  override def invokeBlock[A](request: Request[A], block: (ContextRequest[A]) => Future[Result]): Future[Result] = {
-    // Transform
-    implicit val contextRequest = new ContextRequest[A](TrieMap.empty[String, Any], request)
+  override def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]): Future[Result] = {
+    // Initialize the store
+    implicit val newRequest = parSeqTaskStore.initialize(request)
     // Compose
-    parSeqTraceBuilder.build(block(contextRequest), parSeqTaskStore, parSeqTraceSensor, parSeqTraceRenderer)
+    parSeqTraceBuilder.build(block(newRequest), parSeqTaskStore, parSeqTraceSensor, parSeqTraceRenderer)
   }
 
 }

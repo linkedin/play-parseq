@@ -11,15 +11,17 @@
  */
 package controllers
 
-import play.api.mvc.{Action, Controller}
+import javax.inject.Inject
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 
 /**
  * The class Application is a Controller to show index page.
  *
+ * @param controllerComponents The injected Controller component.
  * @author Yinan Ding (yding@linkedin.com)
  */
-class Application extends Controller {
+class Application @Inject()(controllerComponents: ControllerComponents) extends AbstractController(controllerComponents) {
 
   /**
    * The method index returns the index page.

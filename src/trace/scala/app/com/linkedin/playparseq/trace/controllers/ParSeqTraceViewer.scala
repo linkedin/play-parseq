@@ -14,6 +14,7 @@ package com.linkedin.playparseq.trace.controllers
 import com.linkedin.parseq.{Engine, GraphvizEngine, HttpResponse, Task}
 import com.linkedin.playparseq.s.PlayParSeqImplicits._
 import com.linkedin.playparseq.utils.PlayParSeqHelper
+import controllers.Assets
 import java.io.ByteArrayInputStream
 import java.nio.file.{Files, Path}
 import javax.inject.{Inject, Singleton}
@@ -22,7 +23,7 @@ import org.apache.commons.io.FileUtils
 import play.api.Configuration
 import play.api.Logger
 import play.api.inject.ApplicationLifecycle
-import play.api.mvc.{Action, AnyContent, Controller, Result}
+import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, Result}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.sys.process
 import scala.util.{Failure, Success, Try}
@@ -35,11 +36,13 @@ import scala.util.{Failure, Success, Try}
  * @param engine The injected ParSeq Engine component
  * @param applicationLifecycle The injected ApplicationLifeCycle component
  * @param configuration The injected Configuration component
+ * @param assets The injected Assets Controller
+ * @param controllerComponents The injected Controller component
  * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
 @Singleton
-class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: ApplicationLifecycle, configuration: Configuration)(implicit executionContext: ExecutionContext) extends PlayParSeqHelper with Controller {
+class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: ApplicationLifecycle, configuration: Configuration, assets: Assets, val controllerComponents: ControllerComponents)(implicit executionContext: ExecutionContext) extends PlayParSeqHelper with BaseController {
 
   /**
    * A happy logger.
@@ -86,7 +89,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
       }
     } else {
       // Resource file
-      controllers.Assets.at("/tracevis", file)
+      assets.at("/tracevis", file)
     }
   }
 
@@ -120,7 +123,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The file path
    */
-  private[this] def getDotLocation: String = configuration.getString("parseq.trace.docLocation").getOrElse(Try {
+  private[this] def getDotLocation: String = configuration.getOptional[String]("parseq.trace.docLocation").getOrElse(Try {
     System.getProperty("os.name").toLowerCase match {
       case u if u.indexOf("mac") >= 0 || u.indexOf("nix") >= 0 || u.indexOf("nux") >= 0 || u.indexOf("aix") >= 0 => process.stringToProcess("which dot").!!.trim
       case w if w.indexOf("win") >= 0 => process.stringToProcess("where dot").!!.trim
@@ -137,7 +140,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The number of cache
    */
-  private[this] def getCacheSize: Int = configuration.getInt("parseq.trace.cacheSize").getOrElse(1024)
+  private[this] def getCacheSize: Int = configuration.getOptional[Int]("parseq.trace.cacheSize").getOrElse(1024)
 
   /**
    * The method getTimeoutSeconds gets the timeout of the GraphvizEngine execution in the unit of milliseconds from conf
@@ -145,7 +148,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The timeout in milliseconds
    */
-  private[this] def getTimeoutMilliseconds: Long = configuration.getLong("parseq.trace.timeoutMilliseconds").getOrElse(5000)
+  private[this] def getTimeoutMilliseconds: Long = configuration.getOptional[Long]("parseq.trace.timeoutMilliseconds").getOrElse(5000)
 
   /**
    * The method getParallelLevel gets the maximum of the GraphvizEngine's parallel level from conf file, otherwise it
@@ -153,7 +156,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The parallel level
    */
-  private[this] def getParallelLevel: Int = configuration.getInt("parseq.trace.parallelLevel").getOrElse(Runtime.getRuntime.availableProcessors)
+  private[this] def getParallelLevel: Int = configuration.getOptional[Int]("parseq.trace.parallelLevel").getOrElse(Runtime.getRuntime.availableProcessors)
 
   /**
    * The method getDelayMilliseconds gets the delay time between different executions of the GraphvizEngine in the unit
@@ -161,7 +164,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The delay time in milliseconds
    */
-  private[this] def getDelayMilliseconds: Long = configuration.getLong("parseq.trace.delayMilliseconds").getOrElse(5)
+  private[this] def getDelayMilliseconds: Long = configuration.getOptional[Long]("parseq.trace.delayMilliseconds").getOrElse(5)
 
   /**
    * The method getProcessQueueSize gets the size of the GraphvizEngine's process queue from conf file, otherwise it
@@ -169,6 +172,6 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
    *
    * @return The size of process queue
    */
-  private[this] def getProcessQueueSize: Int = configuration.getInt("parseq.trace.processQueueSize").getOrElse(1000)
+  private[this] def getProcessQueueSize: Int = configuration.getOptional[Int]("parseq.trace.processQueueSize").getOrElse(1000)
 
 }
