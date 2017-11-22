@@ -79,7 +79,7 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
       });
       // Generate Result of ParSeq Trace
       return Optional.ofNullable(
-          showTrace(new Trace(traceMap, relationships), _environment.underlying(), _httpConfiguration))
+          showTrace(new Trace(traceMap, relationships), _environment.asScala(), _httpConfiguration))
           .map(s -> Results.ok(s).as("text/html")).orElse(Results.internalServerError("Can't show Trace."));
     });
   }

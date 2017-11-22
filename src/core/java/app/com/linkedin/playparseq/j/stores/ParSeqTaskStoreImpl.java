@@ -13,17 +13,19 @@ package com.linkedin.playparseq.j.stores;
 
 import com.linkedin.parseq.Task;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Singleton;
+import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 
 
 /**
  * The class ParSeqTaskStoreImpl is an implementation of the interface {@link ParSeqTaskStore}, whose store exists
- * inside the HTTP Context's args map.
+ * inside the attribute of the request.
+ * However, the attribute is only initialized when you use the ParSeqTraceAction for the ParSeq Trace feature. The
+ * store will still work correctly without ParSeqTraceAction when not using ParSeqTraceAction, but act like dummy.
  *
  * @author Yinan Ding (yding@linkedin.com)
  */
@@ -33,30 +35,40 @@ public class ParSeqTaskStoreImpl implements ParSeqTaskStore {
   /**
    * The field ARGUMENTS_KEY is the default key of ParSeq Tasks.
    */
-  public final static String ARGUMENTS_KEY = "ParSeqTasks";
+  public final static TypedKey<Set<Task<?>>> ARGUMENTS_KEY = TypedKey.create("ParSeqTasks");
 
   /**
    * {@inheritDoc}
    */
   @Override
   public void put(final Http.Context context, final Task<?> task) {
-    get(context).add(task);
+    getOptional(context).map(tasks -> tasks.add(task));
   }
 
   /**
    * {@inheritDoc}
    */
-  @SuppressWarnings("unchecked")
   @Override
   public Set<Task<?>> get(final Http.Context context) {
-    Map<String, Object> args = context.args;
-    synchronized (args) {
-      return Optional.ofNullable((Set<Task<?>>) args.get(ARGUMENTS_KEY)).orElseGet(() -> {
-        Set<Task<?>> tasks = Collections.newSetFromMap(new ConcurrentHashMap());
-        args.put(ARGUMENTS_KEY, tasks);
-        return tasks;
-      });
-    }
+    return getOptional(context).map(Collections::unmodifiableSet).orElse(Collections.emptySet());
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Http.Context initialize(final Http.Context context) {
+    return context.withRequest(context.request().addAttr(ARGUMENTS_KEY, ConcurrentHashMap.newKeySet()));
+  }
+
+  /**
+   * The method getOptional gets the optional modifiable Set of Tasks from one request out of store for modifications.
+   *
+   * @param context The HTTP Context
+   * @return A Set of Tasks
+   */
+  private Optional<Set<Task<?>>> getOptional(final Http.Context context) {
+    return context.request().attrs().getOptional(ARGUMENTS_KEY);
   }
 
 }

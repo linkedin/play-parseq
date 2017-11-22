@@ -19,7 +19,7 @@ import com.linkedin.playparseq.trace.s.ParSeqTraceAction
 import com.ning.http.client.Response
 import javax.inject.Inject
 import play.api.libs.ws.WSClient
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -30,10 +30,11 @@ import scala.concurrent.{ExecutionContext, Future}
  * @param ws The injected WSClient component
  * @param playParSeq The injected [[PlayParSeq]] component
  * @param parSeqTraceAction The injected [[ParSeqTraceAction]] component
+ * @param controllerComponents The injected Controller component
  * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
-class MultipleTasksSample @Inject()(ws: WSClient, playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction)(implicit executionContext: ExecutionContext) extends Controller {
+class MultipleTasksSample @Inject()(ws: WSClient, playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction, controllerComponents: ControllerComponents)(implicit executionContext: ExecutionContext) extends AbstractController(controllerComponents) {
 
   /**
    * The method demo runs two independent Tasks, and is able to show the ParSeq Trace if the request has

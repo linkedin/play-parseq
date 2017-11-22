@@ -58,7 +58,7 @@ class CoreOnlySampleSpec extends PlaySpecification {
       // Assert the status and the content
       status(result) must equalTo(OK)
       contentType(result) must beSome("text/plain")
-      contentAsString(result) must equalTo(new CoreOnlySample(null)(null).DefaultFailure)
+      contentAsString(result) must equalTo(new CoreOnlySample(null, null)(null).DefaultFailure)
     }
   }
 

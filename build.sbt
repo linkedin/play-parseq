@@ -1,10 +1,10 @@
 import scala.language.postfixOps
 
-val playParSeqVersion = "0.7.0"
+val playParSeqVersion = "0.8.0"
 
 val playParSeqScalaVersion = "2.11.11"
 
-val playParSeqCrossScalaVersions = Seq("2.11.11")
+val playParSeqCrossScalaVersions = Seq("2.11.11", "2.12.4")
 
 val parSeqVersion = "2.6.22"
 
@@ -110,6 +110,7 @@ lazy val `play-parseq-sample` =
       name := """play-parseq-sample""",
       commonSettings,
       libraryDependencies ++= Seq(
+        guice,
         javaWs,
         ws,
         "com.linkedin.parseq" % "parseq-http-client" % parSeqVersion,

@@ -13,7 +13,7 @@ package controllers.s
 
 import com.linkedin.playparseq.s.PlayParSeq
 import javax.inject.Inject
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -22,10 +22,11 @@ import scala.concurrent.{ExecutionContext, Future}
  * execution of ParSeq Task by substring jobs without enabling the ParSeq Trace feature.
  *
  * @param playParSeq The injected [[PlayParSeq]] component
+ * @param controllerComponents The injected Controller component
  * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
-class CoreOnlySample @Inject()(playParSeq: PlayParSeq)(implicit executionContext: ExecutionContext) extends Controller {
+class CoreOnlySample @Inject()(playParSeq: PlayParSeq, controllerComponents: ControllerComponents)(implicit executionContext: ExecutionContext) extends AbstractController(controllerComponents) {
 
   /**
    * The field DefaultFailure is the default failure output.

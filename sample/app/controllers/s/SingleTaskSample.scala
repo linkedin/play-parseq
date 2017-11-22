@@ -14,9 +14,9 @@ package controllers.s
 import com.linkedin.parseq.Task
 import com.linkedin.playparseq.s.PlayParSeq
 import com.linkedin.playparseq.s.PlayParSeqImplicits._
-import javax.inject.Inject
 import com.linkedin.playparseq.trace.s.ParSeqTraceAction
-import play.api.mvc.{Action, AnyContent, Controller}
+import javax.inject.Inject
+import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -26,10 +26,11 @@ import scala.concurrent.{ExecutionContext, Future}
  *
  * @param playParSeq The injected [[PlayParSeq]] component
  * @param parSeqTraceAction The injected [[ParSeqTraceAction]] component
+ * @param controllerComponents The injected Controller component
  * @param executionContext The injected [[ExecutionContext]] component
  * @author Yinan Ding (yding@linkedin.com)
  */
-class SingleTaskSample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction)(implicit executionContext: ExecutionContext) extends Controller {
+class SingleTaskSample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction, controllerComponents: ControllerComponents)(implicit executionContext: ExecutionContext) extends AbstractController(controllerComponents) {
 
   /**
    * The method demo runs one Task, and is able to show the ParSeq Trace if the request has `parseq-trace=true`.

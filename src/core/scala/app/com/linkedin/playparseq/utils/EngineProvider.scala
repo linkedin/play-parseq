@@ -71,7 +71,7 @@ class EngineProvider @Inject()(applicationLifecycle: ApplicationLifecycle, confi
    *
    * @return The number of threads
    */
-  private[this] def getNumThreads: Int = configuration.getInt("parseq.engine.numThreads").getOrElse(Runtime.getRuntime.availableProcessors + 1)
+  private[this] def getNumThreads: Int = configuration.getOptional[Int]("parseq.engine.numThreads").getOrElse(Runtime.getRuntime.availableProcessors + 1)
 
   /**
    * The method getTerminationWaitSeconds gets the maximum time to wait for Engine's termination in the unit of seconds.
@@ -79,6 +79,6 @@ class EngineProvider @Inject()(applicationLifecycle: ApplicationLifecycle, confi
    *
    * @return The time to wait in seconds
    */
-  private[this] def getTerminationWaitSeconds: Int = configuration.getInt("parseq.engine.terminationWaitSeconds").getOrElse(1)
+  private[this] def getTerminationWaitSeconds: Int = configuration.getOptional[Int]("parseq.engine.terminationWaitSeconds").getOrElse(1)
 
 }

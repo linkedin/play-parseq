@@ -10,7 +10,7 @@ Key features:
 * Converts from Java `Callable<CompletionStage<T>>` or Scala `() => Future[T]` to ParSeq `Task`, which allows existing code using Play native APIs to be integrated with ParSeq Tasks.
 * Supports [ParSeq Trace](https://github.com/linkedin/parseq/wiki/Tracing).
 * Provides both Scala and Java API.
-* Requires Play 2.5 (Dependency Injection).
+* Requires Play 2.6.
 
 ## Getting Play-ParSeq
 
@@ -95,7 +95,7 @@ Key features:
 
     ```scala
     ...
-    class Sample @Inject()(playParSeq: PlayParSeq) extends Controller {
+    class Sample @Inject()(playParSeq: PlayParSeq, cc: ControllerComponents) extends AbstractController(cc) {
     ...
     ```
 
@@ -135,7 +135,7 @@ Key features:
 
     ```scala
     ...
-    class Sample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction) extends Controller {
+    class Sample @Inject()(playParSeq: PlayParSeq, parSeqTraceAction: ParSeqTraceAction, cc: ControllerComponents) extends AbstractController(cc) {
     ...
     ```
 
@@ -157,7 +157,7 @@ Please see `/sample`.
 
 ### Why is there no ParSeq Trace Viewer even though I've added `parseq-trace=true` to my query?
 
-**A:** Please first make sure you annotated your Action with `@With(ParSeqTraceAction.class)` in Java, or you used `parSeqTraceAction.async` for your Action in Scala. Then check whether you meet all `ParSeqTraceSensor` requirements of showing ParSeq Trace. And also don't forget using `runTask` in your Action.
+**A:** Please first make sure you annotated your Action with `@With(ParSeqTraceAction.class)` in Java, or you used `parSeqTraceAction.async` for your Action in Scala. Then check whether you meet all `ParSeqTraceSensor` requirements of showing ParSeq Trace. And also don't forget using `runTask` in your Action. Please also note that ParSeq Trace Viewer will be blocked by strict Content Security Policy rules because of some inline scripts and styles.
 
 ### How can I use my own module settings?
 
