@@ -1,6 +1,6 @@
 import scala.language.postfixOps
 
-val playParSeqVersion = "0.8.0"
+val playParSeqVersion = "0.8.1"
 
 val playParSeqScalaVersion = "2.11.11"
 
