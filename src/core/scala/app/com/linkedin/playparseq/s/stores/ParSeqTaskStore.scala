@@ -16,7 +16,7 @@ import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Singleton
 import play.api.libs.typedmap.TypedKey
-import play.api.mvc.{Request, RequestHeader}
+import play.api.mvc.RequestHeader
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{Set => MutableSet}
 
@@ -54,7 +54,7 @@ trait ParSeqTaskStore {
    * @tparam T The type parameter of the Request
    * @return The Request with store set up properly
    */
-  def initialize[T](request: Request[T]): Request[T]
+  def initialize[T <: RequestHeader](request: T): T
 
 }
 
@@ -87,7 +87,7 @@ class ParSeqTaskStoreImpl extends ParSeqTaskStore {
   /**
    * @inheritdoc
    */
-  override def initialize[T](request: Request[T]): Request[T] = request.addAttr(ArgumentsKey, Collections.newSetFromMap[Task[_]](new ConcurrentHashMap).asScala)
+  override def initialize[T <: RequestHeader](request: T): T = request.addAttr(ArgumentsKey, Collections.newSetFromMap[Task[_]](new ConcurrentHashMap).asScala).asInstanceOf[T]
 
   /**
    * The method getOption gets the optional mutable Set of Tasks from one request out of store for modifications.
