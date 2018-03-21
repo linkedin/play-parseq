@@ -1,0 +1,36 @@
+description = "Sanity integration tests of the build automation"
+
+repositories {
+    maven {
+        url rootProject.file("dist").toURI()
+    }
+}
+
+configurations {
+    test11
+    test12
+}
+
+dependencies {
+    test11 "com.linkedin.play-parseq:play-parseq-scala_2.11:$version"
+    test12 "com.linkedin.play-parseq:play-parseq-scala_2.12:$version"
+
+    test11 "com.linkedin.play-parseq:play-parseq-trace-scala_2.11:$version"
+    test12 "com.linkedin.play-parseq:play-parseq-trace-scala_2.12:$version"
+
+    test11 "com.linkedin.play-parseq:play-parseq-trace_2.11:$version"
+    test12 "com.linkedin.play-parseq:play-parseq-trace_2.12:$version"
+
+    test11 "com.linkedin.play-parseq:play-parseq_2.11:$version"
+    test12 "com.linkedin.play-parseq:play-parseq_2.12:$version"
+}
+
+task publicationsTest {
+    description = "Sanity test if the build produces consumable Maven artifacts"
+    doLast {
+        def help = "Unable to resolve desired number of dependencies. Did you run the build?"
+        assert configurations.test11.size() == 4 : help
+        assert configurations.test12.size() == 4 : help
+        println "Sanity test completed!"
+    }
+}
