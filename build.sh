@@ -1,0 +1,2 @@
+rm -rf dist
+sbt -Dsbt.parser.simple=true clean 'set publishMavenStyle in Global := false' 'set every publishTo := Some(Resolver.file("local-repo", file("dist"))(Patterns(Seq("[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).ivy"),Seq("[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"),true)))' '+ publish'
