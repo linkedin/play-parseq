@@ -7,5 +7,6 @@ target
 /.classpath
 /.project
 /.settings
+/.gradle
 /activator*
 /RUNNING_PID
