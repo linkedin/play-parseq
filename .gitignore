@@ -2,6 +2,7 @@
 logs
 target
 dist
+build
 /.history
 /.idea
 /.idea_modules
