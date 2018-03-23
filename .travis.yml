@@ -6,7 +6,7 @@ language: java
 jdk:
   - oraclejdk8
 
-#Skipping install step to avoid having Travis run arbitrary './gradlew assemble' task
+# Skipping install step to avoid having Travis run arbitrary './gradlew assemble' task
 # https://docs.travis-ci.com/user/customizing-the-build/#Skipping-the-Installation-Step
 install:
   - true
@@ -15,6 +15,9 @@ install:
 branches:
   except:
   - /^v\d/
+
+before_script:
+  - chmod +x build.sh
 
 #Build and perform release (if needed)
 script:
