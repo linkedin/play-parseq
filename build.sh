@@ -1,2 +1,2 @@
 rm -rf dist
-sbt -Dsbt.parser.simple=true clean 'set publishMavenStyle in Global := false' 'set every publishTo := Some(Resolver.file("local-repo", file("dist"))(Patterns(Seq("[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).ivy"),Seq("[organisation]/[module]/[revision]/[module]-[revision](-[classifier]).[ext]"),true)))' '+ publish'
+java -Xms512M -Xmx2G -Xss2M -XX:ReservedCodeCacheSize=192m -XX:+CMSClassUnloadingEnabled -Dfile.encoding=UTF-8 -jar sbt/sbt-launch.jar -Dsbt.parser.simple=true clean 'set every publishTo := Some(Resolver.file("local-repo", file("dist")))' '+ publish'
