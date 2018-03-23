@@ -1,13 +1,13 @@
 shipkit {
-   //TODO change to 'linkedin/play-parseq'
-   gitHub.repository = "mockitoguy/play-parseq"
-   //TODO generate and use your own readonly token
+   gitHub.repository = "linkedin/play-parseq"
+   //TODO Yinan: generate and use your own readonly GitHub token
    gitHub.readOnlyAuthToken = "76826c9ec886612f504d12fd4268b16721c4f85d" //for reading the issues in GitHub
 
-   //TODO generate GitHub write token, and ensure your Travis CI has this env variable exported
+   //TODO Yinan: generate GitHub write token, and ensure your Travis CI has this env variable exported
    gitHub.writeAuthToken = System.getenv("GH_WRITE_TOKEN")
 }
 
+//We want to exclude some modules from publishing
 ext.releaseSpec = fileTree("dist") {
     exclude "com/linkedin/play-parseq/play-parseq-root*/**"
     exclude "com/linkedin/play-parseq/play-parseq-sample*/**"
@@ -30,7 +30,7 @@ plugins.withId("org.shipkit.bintray") {
    //For reference see the official documentation: https://github.com/bintray/gradle-bintray-plugin
    bintray {
 
-       //Currently, we are using szczepiq's Bintray user+key to publish
+       //TODO Yinan: use your user+key below
        //In order to use a different user+key for publications:
        // 1. Get permissions to write to Bintray LinkedIn organization, use Bintray web UI to generate your key
        // 2. Update the 'user' setting below and export 'BINTRAY_API_KEY' env variable with your key
@@ -41,9 +41,6 @@ plugins.withId("org.shipkit.bintray") {
            from releaseSpec
            into '.'
        }
-
-       //TODO: set to true once we're ready
-       publish = false
 
        pkg {
            repo = 'test-repo' //TODO: change to 'maven'
