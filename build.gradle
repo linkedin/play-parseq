@@ -9,11 +9,14 @@ buildscript {
     }
 }
 
-apply plugin: "org.shipkit.release2"
+apply plugin: "org.shipkit.single-project"
 
 task build(type: Exec) {
     commandLine "./build.sh"
 }
+
+//Performing hard to reverse release operation (git push) as late as possible
+gitPush.mustRunAfter build
 
 task clean(type: Delete) {
     delete "dist"
