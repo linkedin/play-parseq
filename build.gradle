@@ -18,6 +18,6 @@ task build(type: Exec) {
 //Performing hard to reverse release operation (git push) as late as possible
 gitPush.mustRunAfter build
 
-task clean(type: Delete) {
+task clean(type: Exec) {
     commandLine "./clean.sh"
 }
