@@ -1,11 +1,14 @@
 .DS_STORE
 logs
 target
+dist
+build
 /.history
 /.idea
 /.idea_modules
 /.classpath
 /.project
 /.settings
+/.gradle
 /activator*
 /RUNNING_PID

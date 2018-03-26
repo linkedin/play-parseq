@@ -1,0 +1,45 @@
+shipkit {
+   gitHub.repository = "linkedin/play-parseq"
+   gitHub.readOnlyAuthToken = "d820fc5cc70e69a8512b3ac0a25cd17b3b262491" //for reading the issues in GitHub
+   gitHub.writeAuthToken = System.getenv("GH_WRITE_TOKEN")
+}
+
+ext.releaseSpec = fileTree("dist")
+
+task showReleaseSpec {
+    description = "Shows what files will be uploaded to Bintray. Useful for debugging."
+    doLast {
+        if (releaseSpec.empty) {
+            println "Directory 'dist' is empty. Did you run the build?"
+        } else {
+            println "Following files will be released to Bintray:"
+            releaseSpec.each { println relativePath(it) }
+        }
+    }
+}
+
+plugins.withId("org.shipkit.bintray") {
+   //Bintray configuration is handled by JFrog Bintray Gradle Plugin
+   //For reference see the official documentation: https://github.com/bintray/gradle-bintray-plugin
+   bintray {
+
+       //In order to use a different user+key for publications:
+       // 1. Get permissions to write to Bintray LinkedIn organization, use Bintray web UI to generate your key
+       // 2. Update the 'user' setting below and export 'BINTRAY_API_KEY' env variable with your key
+       pkg.user = 'franklinyinanding'
+       key = System.getenv("BINTRAY_API_KEY") //this env variable is configured on our CI
+
+       filesSpec {
+           from releaseSpec
+           into '.'
+       }
+
+       pkg {
+           repo = 'test-repo' //TODO: change to 'maven'
+           userOrg = 'linkedin'
+           name = 'play-parseq'
+           licenses = ['Apache-2.0']
+           labels = ['play', 'parseq']
+       }
+   }
+}
