@@ -7,6 +7,8 @@ shipkit {
    gitHub.writeAuthToken = System.getenv("GH_WRITE_TOKEN")
 }
 
+ext.releaseSpec = fileTree("dist")
+
 task showReleaseSpec {
     description = "Shows what files will be uploaded to Bintray. Useful for debugging."
     doLast {
