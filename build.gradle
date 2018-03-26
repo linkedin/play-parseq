@@ -19,5 +19,5 @@ task build(type: Exec) {
 gitPush.mustRunAfter build
 
 task clean(type: Delete) {
-    delete "dist"
+    commandLine "./clean.sh"
 }
