@@ -7,12 +7,6 @@ shipkit {
    gitHub.writeAuthToken = System.getenv("GH_WRITE_TOKEN")
 }
 
-//We want to exclude some modules from publishing
-ext.releaseSpec = fileTree("dist") {
-    exclude "com/linkedin/play-parseq/play-parseq-root*/**"
-    exclude "com/linkedin/play-parseq/play-parseq-sample*/**"
-}
-
 task showReleaseSpec {
     description = "Shows what files will be uploaded to Bintray. Useful for debugging."
     doLast {
