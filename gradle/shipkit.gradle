@@ -6,18 +6,6 @@ shipkit {
 
 ext.releaseSpec = fileTree("dist")
 
-task showReleaseSpec {
-    description = "Shows what files will be uploaded to Bintray. Useful for debugging."
-    doLast {
-        if (releaseSpec.empty) {
-            println "Directory 'dist' is empty. Did you run the build?"
-        } else {
-            println "Following files will be released to Bintray:"
-            releaseSpec.each { println relativePath(it) }
-        }
-    }
-}
-
 plugins.withId("org.shipkit.bintray") {
    //Bintray configuration is handled by JFrog Bintray Gradle Plugin
    //For reference see the official documentation: https://github.com/bintray/gradle-bintray-plugin
