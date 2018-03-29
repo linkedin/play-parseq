@@ -1,5 +1,7 @@
 # Play-ParSeq
 
+[![Build Status](https://travis-ci.org/linkedin/play-parseq.svg?branch=master)](https://travis-ci.org/linkedin/play-parseq)
+
 Play-ParSeq is a Play module which seamlessly integrates [ParSeq](https://github.com/linkedin/parseq) with Play Framework.
 
 ParSeq is a Java framework for writing async code, which has several advantages over Java CompletionStage or Scala Future, e.g. ParSeq Trace for async code's runtime visualization, async code reuse via Task composition and taking control of async code's lifecycle.
