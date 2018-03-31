@@ -23,7 +23,7 @@ plugins.withId("org.shipkit.bintray") {
        }
 
        pkg {
-           repo = 'test-repo' //TODO: change to 'maven'
+           repo = 'maven'
            userOrg = 'linkedin'
            name = 'play-parseq'
            licenses = ['Apache-2.0']
