@@ -28,6 +28,14 @@ plugins.withId("org.shipkit.bintray") {
            name = 'play-parseq'
            licenses = ['Apache-2.0']
            labels = ['play', 'parseq']
+
+           version {
+               mavenCentralSync {
+                   sync = true
+                   user = System.env.OSSRH_USER
+                   password = System.env.OSSRH_PWD
+               }
+           }
        }
    }
 }
