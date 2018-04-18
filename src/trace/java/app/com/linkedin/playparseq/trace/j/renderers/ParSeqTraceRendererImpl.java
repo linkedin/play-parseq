@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import play.api.http.HttpConfiguration;
 import play.Environment;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -52,15 +53,22 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
   private final HttpConfiguration _httpConfiguration;
 
   /**
+   * The field _httpExecutionContext is a {@link HttpExecutionContext} for setting Java async task's executor.
+   */
+  private final HttpExecutionContext _httpExecutionContext;
+
+  /**
    * The constructor injects the Environment and the HttpConfiguration.
    *
    * @param environment The injected Environment component
    * @param httpConfiguration The injected HttpConfiguration component
    */
   @Inject
-  public ParSeqTraceRendererImpl(final Environment environment, final HttpConfiguration httpConfiguration) {
+  public ParSeqTraceRendererImpl(final Environment environment, final HttpConfiguration httpConfiguration,
+      final HttpExecutionContext httpExecutionContext) {
     _environment = environment;
     _httpConfiguration = httpConfiguration;
+    _httpExecutionContext = httpExecutionContext;
   }
 
   /**
@@ -81,7 +89,7 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
       return Optional.ofNullable(
           showTrace(new Trace(traceMap, relationships), _environment.asScala(), _httpConfiguration))
           .map(s -> Results.ok(s).as("text/html")).orElse(Results.internalServerError("Can't show Trace."));
-    });
+    }, _httpExecutionContext.current());
   }
 
 }

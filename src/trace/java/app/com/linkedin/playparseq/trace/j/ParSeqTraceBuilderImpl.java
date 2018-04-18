@@ -23,6 +23,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -42,13 +43,19 @@ public class ParSeqTraceBuilderImpl extends PlayParSeqTraceHelper implements Par
   private final Materializer _materializer;
 
   /**
+   * The field _httpExecutionContext is a {@link HttpExecutionContext} for setting Java async task's executor.
+   */
+  private final HttpExecutionContext _httpExecutionContext;
+
+  /**
    * The constructor injects the Materializer.
    *
    * @param materializer The injected Materializer component
    */
   @Inject
-  public ParSeqTraceBuilderImpl(final Materializer materializer) {
+  public ParSeqTraceBuilderImpl(final Materializer materializer, final HttpExecutionContext httpExecutionContext) {
     _materializer = materializer;
+    _httpExecutionContext = httpExecutionContext;
   }
 
   /**
@@ -69,7 +76,8 @@ public class ParSeqTraceBuilderImpl extends PlayParSeqTraceHelper implements Par
       // Combine all CompletionStages into one, which is completed when all CompletionStages complete, then render
       return CompletableFuture.allOf(
           completionStages.stream().map(CompletionStage::toCompletableFuture).toArray(CompletableFuture[]::new))
-          .thenComposeAsync(__ -> parSeqTraceRenderer.render(context, parSeqTaskStore));
+          .thenComposeAsync(__ -> parSeqTraceRenderer.render(context, parSeqTaskStore),
+              _httpExecutionContext.current());
     } else {
       return origin;
     }

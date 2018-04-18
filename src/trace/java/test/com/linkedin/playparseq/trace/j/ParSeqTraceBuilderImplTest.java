@@ -20,7 +20,9 @@ import com.linkedin.playparseq.trace.j.sensors.ParSeqTraceSensor;
 import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ForkJoinPool;
 import org.junit.Test;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -60,8 +62,11 @@ public class ParSeqTraceBuilderImplTest {
     Materializer mockMaterializer = mock(Materializer.class);
     when(mockMaterializer.<CompletionStage<Done$>>materialize(any())).thenReturn(
         CompletableFuture.completedFuture(Done$.MODULE$));
+    // Mock HttpExecutionContext
+    HttpExecutionContext mockHttpExecutionContext = mock(HttpExecutionContext.class);
+    when(mockHttpExecutionContext.current()).thenReturn(ForkJoinPool.commonPool());
     // Build ParSeq Trace
-    ParSeqTraceBuilderImpl playParSeqTraceImpl = new ParSeqTraceBuilderImpl(mockMaterializer);
+    ParSeqTraceBuilderImpl playParSeqTraceImpl = new ParSeqTraceBuilderImpl(mockMaterializer, mockHttpExecutionContext);
     Result result = PlayParSeqImplTest.getResultUnchecked(
         playParSeqTraceImpl.build(mock(Http.Context.class), CompletableFuture.completedFuture(notFound("origin")),
             mockStore, mockTraceSensor, mockTraceRenderer));
@@ -91,8 +96,11 @@ public class ParSeqTraceBuilderImplTest {
     Materializer mockMaterializer = mock(Materializer.class);
     when(mockMaterializer.<CompletionStage<Done$>>materialize(any())).thenReturn(
         CompletableFuture.completedFuture(Done$.MODULE$));
+    // Mock HttpExecutionContext
+    HttpExecutionContext mockHttpExecutionContext = mock(HttpExecutionContext.class);
+    when(mockHttpExecutionContext.current()).thenReturn(ForkJoinPool.commonPool());
     // Build ParSeq Trace
-    ParSeqTraceBuilderImpl playParSeqTraceImpl = new ParSeqTraceBuilderImpl(mockMaterializer);
+    ParSeqTraceBuilderImpl playParSeqTraceImpl = new ParSeqTraceBuilderImpl(mockMaterializer, mockHttpExecutionContext);
     Result result = PlayParSeqImplTest.getResultUnchecked(
         playParSeqTraceImpl.build(mock(Http.Context.class), CompletableFuture.completedFuture(notFound(origin)),
             mockStore, mockTraceSensor, mockTraceRenderer));
