@@ -14,6 +14,16 @@ Key features:
 * Provides both Scala and Java API.
 * Requires Play 2.6.
 
+## Releasing
+
+Every change on master branch, for example a merged pull request, lands a new version in
+[Bintray's JCenter](https://bintray.com/linkedin/maven/play-parseq)
+and [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3Acom.linkedin.play-parseq).
+This way we continuously deliver improvements in small batches, ensuring quality and compatibility.
+Check out [latest release notes](https://github.com/linkedin/play-parseq/blob/master/docs/release-notes.md)!
+Release automation is handled by Shipkit (http://shipkit.org)
+and configured in [shipkit.gradle](https://github.com/linkedin/play-parseq/blob/master/gradle/shipkit.gradle).
+
 ## Getting Play-ParSeq
 
 [TODO] Need to setup maven first.
