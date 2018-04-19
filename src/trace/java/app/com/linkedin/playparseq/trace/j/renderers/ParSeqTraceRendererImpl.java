@@ -62,6 +62,7 @@ public class ParSeqTraceRendererImpl extends ParSeqTraceBaseVisualizer implement
    *
    * @param environment The injected Environment component
    * @param httpConfiguration The injected HttpConfiguration component
+   * @param httpExecutionContext The injected HttpExecutionContext component
    */
   @Inject
   public ParSeqTraceRendererImpl(final Environment environment, final HttpConfiguration httpConfiguration,

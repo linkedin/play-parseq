@@ -51,6 +51,7 @@ public class ParSeqTraceBuilderImpl extends PlayParSeqTraceHelper implements Par
    * The constructor injects the Materializer.
    *
    * @param materializer The injected Materializer component
+   * @param httpExecutionContext The injected HttpExecutionContext component
    */
   @Inject
   public ParSeqTraceBuilderImpl(final Materializer materializer, final HttpExecutionContext httpExecutionContext) {
