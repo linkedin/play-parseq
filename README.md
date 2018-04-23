@@ -24,10 +24,6 @@ Check out [latest release notes](https://github.com/linkedin/play-parseq/blob/ma
 Release automation is handled by Shipkit (http://shipkit.org)
 and configured in [shipkit.gradle](https://github.com/linkedin/play-parseq/blob/master/gradle/shipkit.gradle).
 
-## Getting Play-ParSeq
-
-[TODO] Need to setup maven first.
-
 ## Quick start
 
 ### Core Java
