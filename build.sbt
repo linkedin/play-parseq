@@ -26,6 +26,13 @@ val mockitoVersion = "1.10.19"
 lazy val commonSettings = List(
   version := playParSeqVersion,
   organization := "com.linkedin.play-parseq",
+  licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  homepage := Some(url("https://github.com/linkedin/play-parseq")),
+  scmInfo := Some(ScmInfo(url("https://github.com/linkedin/play-parseq"), "git@github.com:linkedin/play-parseq.git")),
+  developers := List(
+    Developer("FranklinYinanDing", "Yinan Ding", "yding@linkedin.com", url("https://github.com/FranklinYinanDing")),
+    Developer("bbarkley", "Bryan Barkley", "bbarkley@linkedin.com", url("https://github.com/bbarkley"))
+  ),
   scalaVersion := playParSeqScalaVersion,
   crossScalaVersions := playParSeqCrossScalaVersions
 )
