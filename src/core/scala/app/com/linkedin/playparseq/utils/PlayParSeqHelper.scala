@@ -16,6 +16,7 @@ import com.linkedin.parseq.promise.{Promises, SettablePromise, Promise => ParSeq
 import java.util.concurrent.Callable
 
 import com.linkedin.parseq.function.Try
+import com.linkedin.playparseq.s.PlayParSeqImplicits
 import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.concurrent.{Future, Promise}
@@ -57,13 +58,14 @@ private[playparseq] abstract class PlayParSeqHelper {
   }
 
   /**
-   * The method bindTaskToFuture binds a `Future[T]` to a ParSeq `Task[T]`, for both success and failure.
+   * The method bindTaskToPromise binds a `Promise[T]` to a ParSeq `Task[T]`, for both success and failure.
    *
    * @param task The ParSeq Task
-   * @tparam T The type parameter of the ParSeq Task and the Future
-   * @return The Future
+   * @param scalaPromise An uncompleted promise
+   * @tparam T The type parameter of the ParSeq Task and the Promise
+   * @return The Task wrapped so that the Promise will be completed when the task finishes
    */
-  private[playparseq] def bindTaskToFuture[T](task: Task[T], scalaPromise: Promise[T]): Task[T] = {
+  private[playparseq] def bindTaskToPromise[T](task: Task[T], scalaPromise: Promise[T]): Task[T] = {
     def unwrapTry(tried: Try[T]): T = {
       if (tried.isFailed) {
         val thrown = tried.getError
@@ -75,7 +77,6 @@ private[playparseq] abstract class PlayParSeqHelper {
         result
       }
     }
-    import com.linkedin.playparseq.s.PlayParSeqImplicits.toFunction1
-    task.toTry.map(toFunction1(unwrapTry))
+    task.toTry.map(PlayParSeqImplicits.toFunction1(unwrapTry))
   }
 }

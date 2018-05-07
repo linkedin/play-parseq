@@ -88,7 +88,7 @@ public class PlayParSeqImpl extends PlayParSeqHelper implements PlayParSeq {
   public <T> F.Promise<T> runTask(final Http.Context context, final Task<T> task) {
     Promise<T> scalaPromise = FPromiseHelper.empty();
     // Wrap a Scala Future which binds to the ParSeq Task
-    Task<T> wrappedTask = bindTaskToFuture(task, scalaPromise);
+    Task<T> wrappedTask = bindTaskToPromise(task, scalaPromise);
     // Put the ParSeq Task into store
     _parSeqTaskStore.put(context, wrappedTask);
     // Run the ParSeq Task

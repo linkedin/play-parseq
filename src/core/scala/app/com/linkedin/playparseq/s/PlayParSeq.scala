@@ -89,7 +89,7 @@ class PlayParSeqImpl @Inject()(engine: Engine, parSeqTaskStore: ParSeqTaskStore)
   override def runTask[T](task: Task[T])(implicit requestHeader: RequestHeader): Future[T] = {
     val scalaPromise: Promise[T] = Promise[T]()
     // Bind a Future to the ParSeq Task
-    val boundTask: Task[T] = bindTaskToFuture(task, scalaPromise)
+    val boundTask: Task[T] = bindTaskToPromise(task, scalaPromise)
     // Put the ParSeq Task into store
     parSeqTaskStore.put(boundTask)
     // Run the ParSeq Task

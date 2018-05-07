@@ -108,7 +108,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
     })
     // Run task
     val promise: Promise[Result] = Promise()
-    engine.run(bindTaskToFuture(task, promise))
+    engine.run(bindTaskToPromise(task, promise))
     promise.future
   })
 
