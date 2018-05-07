@@ -12,9 +12,11 @@
 package com.linkedin.playparseq.utils
 
 import com.linkedin.parseq.Task
-import com.linkedin.parseq.promise.{Promise => ParSeqPromise, PromiseListener, Promises, SettablePromise}
+import com.linkedin.parseq.promise.{Promises, SettablePromise, Promise => ParSeqPromise}
 import java.util.concurrent.Callable
+
 import play.api.libs.concurrent.Execution.Implicits._
+
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
@@ -60,17 +62,10 @@ private[playparseq] abstract class PlayParSeqHelper {
    * @tparam T The type parameter of the ParSeq Task and the Future
    * @return The Future
    */
-  private[playparseq] def bindTaskToFuture[T](task: Task[T]): Future[T] = {
-    // Create a Promise for extracting Future
-    val scalaPromise: Promise[T] = Promise[T]()
-    // Bind
-    task.addListener(new PromiseListener[T] {
-      override def onResolved(parSeqPromise: ParSeqPromise[T]) = {
-        if (parSeqPromise.isFailed) scalaPromise.failure(parSeqPromise.getError)
-        else scalaPromise.success(parSeqPromise.get)
-      }
-    })
-    // Return the Future
-    scalaPromise.future
+  private[playparseq] def bindTaskToFuture[T](task: Task[T], scalaPromise: Promise[T]): Task[T] = {
+    import com.linkedin.playparseq.s.PlayParSeqImplicits.toConsumer1
+    def andThen: T => Unit = result => scalaPromise.success(result)
+    def onFail: Throwable => Unit = thrown => scalaPromise.failure(thrown)
+    task.andThen(andThen).onFailure(onFail)
   }
 }

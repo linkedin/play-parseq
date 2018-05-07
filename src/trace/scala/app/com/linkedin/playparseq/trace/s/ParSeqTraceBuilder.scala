@@ -11,6 +11,8 @@
  */
 package com.linkedin.playparseq.trace.s
 
+import com.linkedin.parseq.Task
+import com.linkedin.parseq.promise.PromiseListener
 import com.linkedin.playparseq.s.stores.{ContextRequest, ParSeqTaskStore}
 import com.linkedin.playparseq.trace.s.renderers.ParSeqTraceRenderer
 import com.linkedin.playparseq.trace.s.sensors.ParSeqTraceSensor
@@ -18,8 +20,10 @@ import com.linkedin.playparseq.trace.utils.ParSeqTraceHelper
 import javax.inject.Inject
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
+
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.Future
+import scala.concurrent.Promise
 
 
 /**
