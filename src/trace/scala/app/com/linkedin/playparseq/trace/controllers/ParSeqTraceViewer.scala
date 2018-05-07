@@ -16,6 +16,7 @@ import com.linkedin.playparseq.s.PlayParSeqImplicits._
 import com.linkedin.playparseq.utils.PlayParSeqHelper
 import java.io.ByteArrayInputStream
 import java.nio.file.{Files, Path}
+
 import javax.inject.{Inject, Singleton}
 import javax.servlet.http.HttpServletResponse
 import org.apache.commons.io.FileUtils
@@ -24,7 +25,9 @@ import play.api.Logger
 import play.api.inject.ApplicationLifecycle
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.{Action, AnyContent, Controller, Result}
+
 import scala.concurrent.Future
+import scala.concurrent.Promise
 import scala.sys.process
 
 
@@ -104,9 +107,9 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
       }
     })
     // Run task
-    val result = bindTaskToFuture(task)
-    engine.run(task)
-    result
+    val promise: Promise[Result] = Promise()
+    engine.run(bindTaskToPromise(task, promise))
+    promise.future
   })
 
   /**
@@ -123,7 +126,7 @@ class ParSeqTraceViewer @Inject()(engine: Engine, applicationLifecycle: Applicat
           case _ => ""
         }
       } catch {
-        case e: Exception => 
+        case e: Exception =>
           val ret = "No executable for dot found. See http://www.graphviz.org"
           Log.error(ret)
           ret

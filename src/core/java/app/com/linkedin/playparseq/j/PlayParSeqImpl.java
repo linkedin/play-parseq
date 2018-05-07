@@ -18,10 +18,13 @@ import com.linkedin.playparseq.utils.PlayParSeqHelper;
 import java.util.concurrent.Callable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import play.core.j.FPromiseHelper;
 import play.libs.F;
 import play.mvc.Http;
 import scala.concurrent.Future;
 import scala.concurrent.Future$;
+import scala.concurrent.Promise;
 import scala.runtime.AbstractFunction0;
 
 
@@ -83,14 +86,15 @@ public class PlayParSeqImpl extends PlayParSeqHelper implements PlayParSeq {
 
   @Override
   public <T> F.Promise<T> runTask(final Http.Context context, final Task<T> task) {
+    Promise<T> scalaPromise = FPromiseHelper.empty();
     // Wrap a Scala Future which binds to the ParSeq Task
-    F.Promise<T> promise = F.Promise.wrap(bindTaskToFuture(task));
+    Task<T> wrappedTask = bindTaskToPromise(task, scalaPromise);
     // Put the ParSeq Task into store
-    _parSeqTaskStore.put(context, task);
+    _parSeqTaskStore.put(context, wrappedTask);
     // Run the ParSeq Task
-    _engine.run(task);
+    _engine.run(wrappedTask);
     // Return the Play Promise
-    return promise;
+    return F.Promise.wrap(scalaPromise.future());
   }
 
   @Override

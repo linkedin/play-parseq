@@ -12,9 +12,13 @@
 package com.linkedin.playparseq.utils
 
 import com.linkedin.parseq.Task
-import com.linkedin.parseq.promise.{Promise => ParSeqPromise, PromiseListener, Promises, SettablePromise}
+import com.linkedin.parseq.promise.{Promises, SettablePromise, Promise => ParSeqPromise}
 import java.util.concurrent.Callable
+
+import com.linkedin.parseq.function.Try
+import com.linkedin.playparseq.s.PlayParSeqImplicits
 import play.api.libs.concurrent.Execution.Implicits._
+
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
@@ -54,23 +58,25 @@ private[playparseq] abstract class PlayParSeqHelper {
   }
 
   /**
-   * The method bindTaskToFuture binds a `Future[T]` to a ParSeq `Task[T]`, for both success and failure.
+   * The method bindTaskToPromise binds a `Promise[T]` to a ParSeq `Task[T]`, for both success and failure.
    *
    * @param task The ParSeq Task
-   * @tparam T The type parameter of the ParSeq Task and the Future
-   * @return The Future
+   * @param scalaPromise An uncompleted promise
+   * @tparam T The type parameter of the ParSeq Task and the Promise
+   * @return The Task wrapped so that the Promise will be completed when the task finishes
    */
-  private[playparseq] def bindTaskToFuture[T](task: Task[T]): Future[T] = {
-    // Create a Promise for extracting Future
-    val scalaPromise: Promise[T] = Promise[T]()
-    // Bind
-    task.addListener(new PromiseListener[T] {
-      override def onResolved(parSeqPromise: ParSeqPromise[T]) = {
-        if (parSeqPromise.isFailed) scalaPromise.failure(parSeqPromise.getError)
-        else scalaPromise.success(parSeqPromise.get)
+  private[playparseq] def bindTaskToPromise[T](task: Task[T], scalaPromise: Promise[T]): Task[T] = {
+    def unwrapTry(tried: Try[T]): T = {
+      if (tried.isFailed) {
+        val thrown = tried.getError
+        scalaPromise.failure(thrown)
+        throw thrown
+      } else {
+        val result = tried.get()
+        scalaPromise.success(result)
+        result
       }
-    })
-    // Return the Future
-    scalaPromise.future
+    }
+    task.toTry.map(PlayParSeqImplicits.toFunction1(unwrapTry))
   }
 }

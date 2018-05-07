@@ -11,10 +11,14 @@
  */
 package com.linkedin.playparseq.trace.utils
 
+import com.linkedin.parseq.Task
+import com.linkedin.parseq.promise.PromiseListener
 import com.linkedin.playparseq.utils.PlayParSeqHelper
 import play.api.libs.iteratee.Iteratee
 import play.api.mvc.Result
+
 import scala.concurrent.Future
+import scala.concurrent.Promise
 
 
 /**
@@ -32,4 +36,25 @@ private[playparseq] abstract class ParSeqTraceHelper extends PlayParSeqHelper {
    * @return The Result
    */
   private[playparseq] def consumeResult(result: Result): Future[Any] = result.body.run(Iteratee.skipToEof)
+
+
+  /**
+   * This is not the correct way to bind to a Future since the PromiseListener could be called by a non-ParSeq thread and
+   * ThreadLocal context from the ParSeq Task thread would be lost. In this case since the Tasks can't be wrapped and
+   * resubmitted to the Engine, and this is only used for trace visualization we are fine with this limitation
+   */
+  protected def bindTaskToFuture[T](task: Task[T]): Future[T] = {
+    import com.linkedin.parseq.promise.{Promise => ParSeqPromise}
+    // Create a Promise for extracting Future
+    val scalaPromise: Promise[T] = Promise[T]()
+    // Bind
+    task.addListener(new PromiseListener[T] {
+      override def onResolved(parSeqPromise: ParSeqPromise[T]) = {
+        if (parSeqPromise.isFailed) scalaPromise.failure(parSeqPromise.getError)
+        else scalaPromise.success(parSeqPromise.get)
+      }
+    })
+    // Return the Future
+    scalaPromise.future
+  }
 }
