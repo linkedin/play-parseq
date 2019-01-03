@@ -55,7 +55,7 @@ and configured in [shipkit.gradle](https://github.com/linkedin/play-parseq/blob/
         // Convert to ParSeq Task
         Task<String> helloworldTask = _playParSeq.toTask("helloworld", () -> CompletableFuture.completedFuture("Hello World"));
         // Run the Task
-        return _playParSeq.runTask(Http.Context.current(), helloworldTask).map(Results::ok);
+        return _playParSeq.runTask(Http.Context.current(), helloworldTask).thenApply(Results::ok);
     }
     ...
     ```
