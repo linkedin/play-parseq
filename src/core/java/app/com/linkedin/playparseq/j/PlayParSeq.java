@@ -14,6 +14,7 @@ package com.linkedin.playparseq.j;
 import com.linkedin.parseq.Task;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionStage;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 
 
@@ -39,6 +40,17 @@ public interface PlayParSeq {
   <T> Task<T> toTask(final String name, final Callable<CompletionStage<T>> f);
 
   /**
+   * The method toTask converts a {@code Callable<CompletionStage<T>>} to a ParSeq {@code Task<T>}.
+   *
+   * @param name The String which describes the Task and shows up in a trace
+   * @param executionContext The Executor of the async CompletionStage
+   * @param f The Callable which returns a CompletionStage
+   * @param <T> The type parameter of the CompletionStage and the ParSeq Task
+   * @return The ParSeq Task
+   */
+  <T> Task<T> toTask(final String name, final Callable<CompletionStage<T>> f, final HttpExecutionContext executionContext);
+
+  /**
    * The method toTask converts a {@code Callable<CompletionStage<T>>} to a ParSeq {@code Task<T>}, which binds with a
    * default name.
    *
@@ -47,6 +59,17 @@ public interface PlayParSeq {
    * @return The ParSeq Task
    */
   <T> Task<T> toTask(final Callable<CompletionStage<T>> f);
+
+  /**
+   * The method toTask converts a {@code Callable<CompletionStage<T>>} to a ParSeq {@code Task<T>}, which binds with a
+   * default name.
+   *
+   * @param f The Callable which returns a CompletionStage
+   * @param executionContext The Executor of the async CompletionStage
+   * @param <T> The type parameter of the CompletionStage and the ParSeq Task
+   * @return The ParSeq Task
+   */
+  <T> Task<T> toTask(final Callable<CompletionStage<T>> f, final HttpExecutionContext executionContext);
 
   /**
    * The method runTask executes a ParSeq {@code Task<T>} then generates a {@code CompletionStage<T>}, and puts into the
