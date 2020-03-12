@@ -1,6 +1,6 @@
 shipkit {
    gitHub.repository = "linkedin/play-parseq"
-   gitHub.readOnlyAuthToken = "d820fc5cc70e69a8512b3ac0a25cd17b3b262491" //for reading the issues in GitHub
+   gitHub.readOnlyAuthToken = System.getenv("GH_READ_TOKEN") //for reading the issues in GitHub
    gitHub.writeAuthToken = System.getenv("GH_WRITE_TOKEN")
 }
 
