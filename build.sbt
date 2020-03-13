@@ -99,7 +99,7 @@ lazy val `play-parseq-trace-scala` =
       name := """play-parseq-trace-scala""",
       commonSettings,
       libraryDependencies ++= Seq(
-        "com.linkedin.parseq" % "parseq-tracevis" % parSeqVersion % "compile->archives",
+        "com.linkedin.parseq" % "parseq-tracevis" % parSeqVersion artifacts Artifact("parseq-tracevis", "tar.gz", "tar.gz"),
         "com.linkedin.parseq" % "parseq-tracevis-server" % parSeqVersion % "compile->default",
         "commons-io" % "commons-io" % commonsIoVersion,
         specs2 % Test
