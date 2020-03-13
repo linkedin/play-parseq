@@ -17,7 +17,7 @@ val playParSeqScalaVersion = "2.11.11"
 
 val playParSeqCrossScalaVersions = Seq("2.11.11", "2.12.4")
 
-val parSeqVersion = "2.6.22"
+val parSeqVersion = "3.0.11"
 
 val commonsIoVersion = "2.5"
 
@@ -72,7 +72,7 @@ lazy val `play-parseq-scala` =
       name := """play-parseq-scala""",
       commonSettings,
       libraryDependencies ++= Seq(
-        "com.linkedin.parseq" % "parseq" % parSeqVersion,
+        "com.linkedin.parseq" % "parseq" % parSeqVersion % "compile->default",
         specs2 % Test
       )
     )
@@ -99,8 +99,8 @@ lazy val `play-parseq-trace-scala` =
       name := """play-parseq-trace-scala""",
       commonSettings,
       libraryDependencies ++= Seq(
-        "com.linkedin.parseq" % "parseq-tracevis" % parSeqVersion artifacts Artifact("parseq-tracevis", "tar.gz", "tar.gz"),
-        "com.linkedin.parseq" % "parseq-tracevis-server" % parSeqVersion,
+        "com.linkedin.parseq" % "parseq-tracevis" % parSeqVersion % "compile->archives",
+        "com.linkedin.parseq" % "parseq-tracevis-server" % parSeqVersion % "compile->default",
         "commons-io" % "commons-io" % commonsIoVersion,
         specs2 % Test
       ),
@@ -131,7 +131,7 @@ lazy val `play-parseq-sample` =
         guice,
         javaWs,
         ws,
-        "com.linkedin.parseq" % "parseq-http-client" % parSeqVersion,
+        "com.linkedin.parseq" % "parseq-http-client" % parSeqVersion % "compile->default",
         specs2 % Test
       ),
       publishArtifact := false
