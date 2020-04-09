@@ -17,6 +17,7 @@ import com.linkedin.playparseq.j.PlayParSeq;
 import com.linkedin.playparseq.trace.j.ParSeqTraceAction;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
+import play.libs.concurrent.HttpExecutionContext;
 import play.libs.ws.WSClient;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -43,15 +44,21 @@ public class MultipleTasksSample extends Controller {
   private final PlayParSeq _playParSeq;
 
   /**
+   * The field _httpExecutionContext is an injected execution context for managing thread local states
+   */
+  private final HttpExecutionContext _httpExecutionContext;
+
+  /**
    * The constructor injects the WSClient and the {@link PlayParSeq}.
    *
    * @param ws The injected {@link WSClient} component
    * @param playParSeq The injected {@link PlayParSeq} component
    */
   @Inject
-  public MultipleTasksSample(final WSClient ws, final PlayParSeq playParSeq) {
+  public MultipleTasksSample(final WSClient ws, final PlayParSeq playParSeq, final HttpExecutionContext httpExecutionContext) {
     _ws = ws;
     _playParSeq = playParSeq;
+    _httpExecutionContext = httpExecutionContext;
   }
 
   /**
@@ -72,7 +79,9 @@ public class MultipleTasksSample extends Controller {
         // In parallel
         Task.par(
             // Convert to ParSeq Task
-            _playParSeq.toTask("http://www.bing.com", () -> getLengthCompletionStage("http://www.bing.com")),
+            _playParSeq.toTask("http://www.bing.com",
+                () -> getLengthCompletionStage("http://www.bing.com"),
+                _httpExecutionContext),
             // Complex ParSeq Task
             getLengthTask("http://www.google.com")
         ).map((g, b) -> ok(String.valueOf(g + b))));

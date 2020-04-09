@@ -17,6 +17,7 @@ import com.linkedin.playparseq.trace.j.ParSeqTraceAction;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -37,13 +38,19 @@ public class SingleTaskSample extends Controller {
   private final PlayParSeq _playParSeq;
 
   /**
+   * The field _httpExecutionContext is injected execution context for managing thread local states
+   */
+  private final HttpExecutionContext _httpExecutionContext;
+
+  /**
    * The constructor injects the {@link PlayParSeq}.
    *
    * @param playParSeq The injected {@link PlayParSeq} component
    */
   @Inject
-  public SingleTaskSample(final PlayParSeq playParSeq) {
+  public SingleTaskSample(final PlayParSeq playParSeq, final HttpExecutionContext httpExecutionContext) {
     _playParSeq = playParSeq;
+    _httpExecutionContext = httpExecutionContext;
   }
 
   /**
@@ -60,7 +67,7 @@ public class SingleTaskSample extends Controller {
         // In parallel
         Task.par(
             // Convert to ParSeq Task
-            _playParSeq.toTask("hello", () -> CompletableFuture.supplyAsync(() -> "Hello")),
+            _playParSeq.toTask("hello", () -> CompletableFuture.supplyAsync(() -> "Hello"), _httpExecutionContext),
             // Simple ParSeq Task
             Task.value("world", "World")).map((h, w) -> ok(h + " " + w)));
   }

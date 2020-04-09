@@ -67,25 +67,9 @@ public class PlayParSeqImpl extends PlayParSeqHelper implements PlayParSeq {
    * {@inheritDoc}
    */
   @Override
-  public <T> Task<T> toTask(final String name, final Callable<CompletionStage<T>> f) {
-    return toTask(name, f, null);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public <T> Task<T> toTask(final String name, final Callable<CompletionStage<T>> f, final HttpExecutionContext executionContext) {
     // Bind a Task to the CompletionStage for both success and failure
     return Task.async(name, transferCompletionStageCallableToPromiseCallable(f, executionContext));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> Task<T> toTask(final Callable<CompletionStage<T>> f) {
-    return toTask(DEFAULT_TASK_NAME, f);
   }
 
   /**
