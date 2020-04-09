@@ -33,32 +33,12 @@ public interface PlayParSeq {
    * The method toTask converts a {@code Callable<CompletionStage<T>>} to a ParSeq {@code Task<T>}.
    *
    * @param name The String which describes the Task and shows up in a trace
-   * @param f The Callable which returns a CompletionStage
-   * @param <T> The type parameter of the CompletionStage and the ParSeq Task
-   * @return The ParSeq Task
-   */
-  <T> Task<T> toTask(final String name, final Callable<CompletionStage<T>> f);
-
-  /**
-   * The method toTask converts a {@code Callable<CompletionStage<T>>} to a ParSeq {@code Task<T>}.
-   *
-   * @param name The String which describes the Task and shows up in a trace
    * @param executionContext The Executor of the async CompletionStage
    * @param f The Callable which returns a CompletionStage
    * @param <T> The type parameter of the CompletionStage and the ParSeq Task
    * @return The ParSeq Task
    */
   <T> Task<T> toTask(final String name, final Callable<CompletionStage<T>> f, final HttpExecutionContext executionContext);
-
-  /**
-   * The method toTask converts a {@code Callable<CompletionStage<T>>} to a ParSeq {@code Task<T>}, which binds with a
-   * default name.
-   *
-   * @param f The Callable which returns a CompletionStage
-   * @param <T> The type parameter of the CompletionStage and the ParSeq Task
-   * @return The ParSeq Task
-   */
-  <T> Task<T> toTask(final Callable<CompletionStage<T>> f);
 
   /**
    * The method toTask converts a {@code Callable<CompletionStage<T>>} to a ParSeq {@code Task<T>}, which binds with a
