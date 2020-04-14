@@ -19,15 +19,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -46,6 +48,11 @@ public class PlayParSeqImplTest {
    * The field _engine is a ParSeq Engine for running ParSeq Task.
    */
   private Engine _engine;
+
+  /**
+   * The field _httpExecutionContext is for managing Play Java HTTP thread local state
+   */
+  private HttpExecutionContext _httpExecutionContext;
 
   /**
    * The field _taskScheduler is a task scheduler for ParSeq Engine.
@@ -80,6 +87,9 @@ public class PlayParSeqImplTest {
     _engine = new EngineBuilder().setTaskExecutor(_taskScheduler).setTimerScheduler(_timerScheduler).build();
     _playParSeqImpl = new PlayParSeqImpl(_engine, mock(ParSeqTaskStore.class));
     _mockContext = mock(Http.Context.class);
+    _httpExecutionContext = mock(HttpExecutionContext.class);
+
+    when(_httpExecutionContext.current()).thenReturn(ForkJoinPool.commonPool());
   }
 
   /**
@@ -104,7 +114,7 @@ public class PlayParSeqImplTest {
   public void canConvertToTaskWithGivenName() {
     String name = "pure";
     // Convert
-    Task<String> task = _playParSeqImpl.toTask(name, () -> CompletableFuture.completedFuture("Test"));
+    Task<String> task = _playParSeqImpl.toTask(name, () -> CompletableFuture.completedFuture("Test"), _httpExecutionContext);
     // Assert the name
     assertEquals(name, task.getName());
   }
@@ -115,7 +125,7 @@ public class PlayParSeqImplTest {
   @Test
   public void canConvertToTaskWithDefaultName() {
     // Convert
-    Task<String> task = _playParSeqImpl.toTask(() -> CompletableFuture.completedFuture("Test"));
+    Task<String> task = _playParSeqImpl.toTask(() -> CompletableFuture.completedFuture("Test"), _httpExecutionContext);
     // Assert the name
     assertEquals(PlayParSeqImpl.DEFAULT_TASK_NAME, task.getName());
   }
@@ -131,7 +141,8 @@ public class PlayParSeqImplTest {
     CompletionStage<String> completionStage = _playParSeqImpl
         .runTask(_mockContext,
             _playParSeqImpl.toTask("substring",
-                () -> CompletableFuture.supplyAsync(() -> testString.substring(start))));
+                () -> CompletableFuture.supplyAsync(() -> testString.substring(start)),
+                _httpExecutionContext));
     // Assert the result from the CompletionStage
     assertEquals(testString.substring(start), getResultUnchecked(completionStage));
   }
@@ -149,7 +160,8 @@ public class PlayParSeqImplTest {
     CompletionStage<String> completionStage = _playParSeqImpl
         .runTask(_mockContext,
             _playParSeqImpl.toTask("substring",
-                () -> CompletableFuture.supplyAsync(() -> testString.substring(start))))
+                () -> CompletableFuture.supplyAsync(() -> testString.substring(start)),
+                _httpExecutionContext))
             .exceptionally(throwable -> recoverString);
     // Assert the result from the CompletionStage which should be the recover value
     assertEquals(recoverString, getResultUnchecked(completionStage));
@@ -167,7 +179,8 @@ public class PlayParSeqImplTest {
     CompletionStage<String> completionStage = _playParSeqImpl
         .runTask(_mockContext,
             _playParSeqImpl.toTask("substring",
-                () -> CompletableFuture.supplyAsync(() -> testString.substring(start))));
+                () -> CompletableFuture.supplyAsync(() -> testString.substring(start)),
+                _httpExecutionContext));
     // Get value from the CompletionStage to trigger the exception
     getResultUnwrapException(completionStage);
   }
