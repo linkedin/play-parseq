@@ -13,14 +13,12 @@ package com.linkedin.playparseq.j;
 
 import com.linkedin.parseq.Engine;
 import com.linkedin.parseq.Task;
-import com.linkedin.parseq.promise.Promise;
 import com.linkedin.parseq.promise.Promises;
 import com.linkedin.parseq.promise.SettablePromise;
 import com.linkedin.playparseq.j.stores.ParSeqTaskStore;
 import com.linkedin.playparseq.utils.PlayParSeqHelper;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionStage;
-import java.util.function.BiConsumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import play.libs.concurrent.HttpExecutionContext;
@@ -52,32 +50,49 @@ public class PlayParSeqImpl extends PlayParSeqHelper implements PlayParSeq {
   private final ParSeqTaskStore _parSeqTaskStore;
 
   /**
+   * The field _httpExecutionContext is a {@link HttpExecutionContext} for keeping ThreadLocal state for toTask.
+   */
+  private final HttpExecutionContext _httpExecutionContext;
+
+  /**
    * The constructor injects the ParSeq Engine and the {@link ParSeqTaskStore}.
    *
    * @param engine The injected ParSeq Engine component
    * @param parSeqTaskStore The injected {@link ParSeqTaskStore} component
+   * @param httpExecutionContext The injected {@link HttpExecutionContext} component
    */
   @Inject
-  public PlayParSeqImpl(final Engine engine, final ParSeqTaskStore parSeqTaskStore) {
+  public PlayParSeqImpl(final Engine engine, final ParSeqTaskStore parSeqTaskStore, HttpExecutionContext httpExecutionContext) {
     _engine = engine;
     _parSeqTaskStore = parSeqTaskStore;
+    _httpExecutionContext = httpExecutionContext;
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public <T> Task<T> toTask(final String name, final Callable<CompletionStage<T>> f, final HttpExecutionContext executionContext) {
+  public <T> Task<T> toTask(final String name, final Callable<CompletionStage<T>> f) {
     // Bind a Task to the CompletionStage for both success and failure
-    return Task.async(name, transferCompletionStageCallableToPromiseCallable(f, executionContext));
+    return Task.async(name, () -> {
+      SettablePromise<T> promise = Promises.settable();
+      f.call().whenCompleteAsync((result, exception) -> {
+        if (exception != null) {
+          promise.fail(exception);
+        } else {
+          promise.done(result);
+        }
+      }, _httpExecutionContext.current());
+      return promise;
+    });
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public <T> Task<T> toTask(final Callable<CompletionStage<T>> f, final HttpExecutionContext executionContext) {
-    return toTask(DEFAULT_TASK_NAME, f, executionContext);
+  public <T> Task<T> toTask(final Callable<CompletionStage<T>> f) {
+    return toTask(DEFAULT_TASK_NAME, f);
   }
 
   /**
@@ -93,32 +108,6 @@ public class PlayParSeqImpl extends PlayParSeqHelper implements PlayParSeq {
     _engine.run(task);
     // Return the CompletionStage
     return completionStage;
-  }
-
-  private <T> Callable<Promise<? extends T>> transferCompletionStageCallableToPromiseCallable(
-      final Callable<CompletionStage<T>> fn,
-      final HttpExecutionContext executionContext) {
-
-    return () -> {
-      final SettablePromise<T> promise = Promises.settable();
-      final CompletionStage<T> future = fn.call();
-      if (null == executionContext) {
-        future.whenCompleteAsync(transferCompletionStageToPromise(promise));
-      } else {
-        future.whenCompleteAsync(transferCompletionStageToPromise(promise), executionContext.current());
-      }
-      return promise;
-    };
-  }
-
-  private <T> BiConsumer<? super T, ? super Throwable> transferCompletionStageToPromise(final SettablePromise<T> promise) {
-    return (result, exception) -> {
-      if (exception != null) {
-        promise.fail(exception);
-      } else {
-        promise.done(result);
-      }
-    };
   }
 
 }

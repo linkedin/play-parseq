@@ -15,7 +15,6 @@ import com.linkedin.playparseq.j.PlayParSeq;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
-import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -37,11 +36,6 @@ public class CoreOnlySample extends Controller {
   private final PlayParSeq _playParSeq;
 
   /**
-   * The field _httpExecutionContext is injected execution context for managing thread local states
-   */
-  private final HttpExecutionContext _httpExecutionContext;
-
-  /**
    * The field DEFAULT_FAILURE is the default failure output.
    */
   public final static String DEFAULT_FAILURE = "Start Index Error";
@@ -52,9 +46,8 @@ public class CoreOnlySample extends Controller {
    * @param playParSeq The injected {@link PlayParSeq} component
    */
   @Inject
-  public CoreOnlySample(final PlayParSeq playParSeq, HttpExecutionContext httpExecutionContext) {
+  public CoreOnlySample(final PlayParSeq playParSeq) {
     _playParSeq = playParSeq;
-    _httpExecutionContext = httpExecutionContext;
   }
 
   /**
@@ -83,7 +76,7 @@ public class CoreOnlySample extends Controller {
         // Convert to ParSeq Task
         _playParSeq.toTask("substring", () -> CompletableFuture.supplyAsync(() -> text.substring(start))
             // Recover
-            .exceptionally(__ -> DEFAULT_FAILURE), null).map("getResult", Results::ok));
+            .exceptionally(__ -> DEFAULT_FAILURE)).map("getResult", Results::ok));
   }
 
 }
